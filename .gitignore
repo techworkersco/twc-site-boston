@@ -1,0 +1,16 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+# .env
+.env
+
+# lambda package
+dist/
+node_modules/
