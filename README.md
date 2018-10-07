@@ -27,6 +27,9 @@ This will mount the local [`src`](./src) and `dist` directories into a container
 Deploy this project using [`terraform`](https://terraform.io).
 
 ```bash
+# Initialize terraform
+terraform init
+
 # View pending changes to infrastructure
 terraform plan
 
