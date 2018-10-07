@@ -1,7 +1,3 @@
-provider archive {
-  version = "~> 1.1"
-}
-
 provider aws {
   version    = "~> 1.39"
   access_key = "${var.aws_access_key_id}"
@@ -9,7 +5,7 @@ provider aws {
   region     = "${var.aws_region}"
 }
 
-data "aws_caller_identity" "current" {
+data aws_caller_identity current {
 }
 
 data aws_iam_policy_document assume_role {
