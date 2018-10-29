@@ -2,6 +2,7 @@ provider aws {
   version    = "~> 1.39"
   access_key = "${var.aws_access_key_id}"
   secret_key = "${var.aws_secret_access_key}"
+  profile    = "${var.aws_profile}"
   region     = "${var.aws_region}"
 }
 
@@ -88,10 +89,16 @@ resource aws_api_gateway_rest_api api {
   }
 }
 
+resource aws_cloudwatch_log_group logs {
+  name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
+  retention_in_days = 30
+}
+
 resource aws_lambda_function lambda {
   description   = "Boston TWC Website"
   function_name = "website"
   handler       = "lambda.handler"
+  memory_size   = 512
   role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AWSLambdaBasicExecution"
   runtime       = "nodejs8.10"
   s3_bucket     = "${var.s3_bucket}"
@@ -117,4 +124,13 @@ resource aws_s3_bucket bucket {
       }
     }
   }
+}
+
+resource aws_s3_bucket_object event_2018_10_28 {
+  acl          = "public-read"
+  bucket       = "${aws_s3_bucket.bucket.bucket}"
+  content_type = "image/jpeg"
+  etag         = "${md5(file("assets/event-2018-10-28.jpeg"))}"
+  key          = "website/assets/event-2018-10-28.jpeg"
+  source       = "assets/event-2018-10-28.jpeg"
 }

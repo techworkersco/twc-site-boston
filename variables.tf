@@ -1,9 +1,16 @@
 variable aws_access_key_id {
   description = "AWS access key ID."
+  default     = ""
 }
 
 variable aws_secret_access_key {
   description = "AWS secret access key."
+  default     = ""
+}
+
+variable aws_profile {
+  description = "AWS profile name."
+  default     = ""
 }
 
 variable aws_region {

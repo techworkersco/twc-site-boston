@@ -1,15 +1,16 @@
 version: '3'
 services:
-  lambda:
+  package:
     command: >
       sh -c "
-        npm install &&
+        rm -rf node_modules/ &&
+        npm install --production &&
         zip -r package.zip node_modules/ app.js index.html lambda.js package.json package-lock.json &&
-        mv package.zip /dist/package.zip
-        aws s3 cp /dist/package.zip s3://${S3_BUCKET}/${S3_KEY}
+        aws s3 cp package.zip s3://${S3_BUCKET}/${S3_KEY} &&
+        rm package.zip
       "
     env_file: ./.env
     image: lambci/lambda:build-nodejs8.10
     volumes:
-      - ./src:/var/task
-      - ./dist:/dist
+    - ./src:/var/task
+    - ~/.aws:/root/.aws
