@@ -1,5 +1,9 @@
+provider archive {
+  version = "~> 1.1"
+}
+
 provider aws {
-  version    = "~> 1.39"
+  version    = "~> 1.46"
   access_key = "${var.aws_access_key_id}"
   secret_key = "${var.aws_secret_access_key}"
   profile    = "${var.aws_profile}"
@@ -7,10 +11,17 @@ provider aws {
 }
 
 locals {
+  package = "website-${var.version}.zip"
   assets = [
     "assets/event-2018-10-28.png",
     "assets/event-2018-12-09.png",
   ]
+}
+
+data archive_file package {
+  output_path = "${path.module}/dist/${local.package}"
+  source_dir  = "${path.module}/src"
+  type        = "zip"
 }
 
 data aws_caller_identity current {
@@ -137,9 +148,9 @@ resource aws_s3_bucket bucket {
 resource aws_s3_bucket_object package {
   bucket       = "${aws_s3_bucket.bucket.bucket}"
   content_type = "application/zip"
-  etag         = "${md5(file("dist/package.zip"))}"
-  key          = "website/package.zip"
-  source       = "dist/package.zip"
+  etag         = "${data.archive_file.package.output_md5}"
+  key          = "website/${local.package}"
+  source       = "${data.archive_file.package.output_path}"
 }
 
 resource aws_s3_bucket_object assets {
@@ -147,7 +158,7 @@ resource aws_s3_bucket_object assets {
   acl          = "public-read"
   bucket       = "${aws_s3_bucket.bucket.bucket}"
   content_type = "image/png"
-  etag         = "${md5(file("src/${element(local.assets, count.index)}"))}"
+  etag         = "${md5(file("${element(local.assets, count.index)}"))}"
   key          = "website/${element(local.assets, count.index)}"
-  source       = "src/${element(local.assets, count.index)}"
+  source       = "${element(local.assets, count.index)}"
 }

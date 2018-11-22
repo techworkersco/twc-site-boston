@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "start": "cd src && npm start",
+    "init": "terraform init && docker-compose run --rm build && docker-compose down",
+    "deploy": "terraform apply"
+  }
+}

@@ -1,15 +1,7 @@
 version: '3'
 services:
-  package:
-    command: >
-      sh -c "
-        rm -rf node_modules/ &&
-        npm install --production &&
-        zip -r /dist/package.zip node_modules app.js index.html lambda.js package.json package-lock.json
-      "
-    env_file: .env
+  build:
+    command: npm install --production
     image: lambci/lambda:build-nodejs8.10
     volumes:
     - ./src:/var/task
-    - ./dist:/dist
-    - ~/.aws:/root/.aws

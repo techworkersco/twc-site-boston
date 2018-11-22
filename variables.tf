@@ -20,8 +20,14 @@ variable aws_region {
 
 variable s3_bucket {
   description = "S3 bucket for Lambda package."
+  default     = "boston.techworkerscoalition.org"
 }
 
 variable s3_key {
   description = "S3 key for Lambda package."
+  default     = "website/package.zip"
+}
+
+variable version {
+  description = "Website CalVer version."
 }
