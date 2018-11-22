@@ -12,6 +12,12 @@ Source the `.env` file:
 source .env
 ```
 
+Run a development server to test with:
+
+```bash
+npm start
+```
+
 ## Build & Deploy
 
 Update the version in `terraform.tfvars` and use the custom `npm` scripts to build and deploy.
