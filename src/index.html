@@ -15,14 +15,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <style>
       .flyer {
-        max-height: 544px;
+        //max-height: 544px;
         max-width: 840px;
         margin: auto;
+        overflow: hidden;
       }
       .flyer img {
         height: auto;
         width: 100%;
         object-fit: contain;
+      }
+      .calendar {
+      }
+      .calendar iframe {
+        display:block;
+        margin:auto;
       }
     </style>
   </head>
@@ -46,6 +53,12 @@
             <img src="https://s3.amazonaws.com/boston.techworkerscoalition.org/website/assets/event-2018-12-09.png"></img>
           </a>
         </div>
+
+        <div class="calendar">
+          <iframe src="https://calendar.google.com/calendar/embed?showTitle=0&amp;showNav=0&amp;showDate=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;mode=AGENDA&amp;height=128&amp;wkst=1&amp;bgcolor=%23ffffff&amp;src=uqr1emskpd1iochp7r1v8v0nl8%40group.calendar.google.com&amp;color=%23B1440E&amp;ctz=America%2FNew_York" style="border-width:0" width="840" height="128" frameborder="0" scrolling="no">
+          </iframe>
+        </div>
+
       </main>
     </div>
     <footer class="footer-content">
