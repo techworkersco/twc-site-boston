@@ -5,12 +5,11 @@ services:
       sh -c "
         rm -rf node_modules/ &&
         npm install --production &&
-        zip -r package.zip node_modules/ app.js index.html lambda.js package.json package-lock.json &&
-        aws s3 cp package.zip s3://${S3_BUCKET}/${S3_KEY} &&
-        rm package.zip
+        zip -r /dist/package.zip node_modules app.js index.html lambda.js package.json package-lock.json
       "
-    env_file: ./.env
+    env_file: .env
     image: lambci/lambda:build-nodejs8.10
     volumes:
     - ./src:/var/task
+    - ./dist:/dist
     - ~/.aws:/root/.aws

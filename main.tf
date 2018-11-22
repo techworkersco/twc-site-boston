@@ -6,6 +6,13 @@ provider aws {
   region     = "${var.aws_region}"
 }
 
+locals {
+  assets = [
+    "assets/event-2018-10-28.png",
+    "assets/event-2018-12-09.png",
+  ]
+}
+
 data aws_caller_identity current {
 }
 
@@ -95,14 +102,15 @@ resource aws_cloudwatch_log_group logs {
 }
 
 resource aws_lambda_function lambda {
-  description   = "Boston TWC Website"
-  function_name = "website"
-  handler       = "lambda.handler"
-  memory_size   = 512
-  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AWSLambdaBasicExecution"
-  runtime       = "nodejs8.10"
-  s3_bucket     = "${var.s3_bucket}"
-  s3_key        = "${var.s3_key}"
+  description       = "Boston TWC Website"
+  function_name     = "website"
+  handler           = "lambda.handler"
+  memory_size       = 512
+  role              = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AWSLambdaBasicExecution"
+  runtime           = "nodejs8.10"
+  s3_bucket         = "${aws_s3_bucket_object.package.bucket}"
+  s3_key            = "${aws_s3_bucket_object.package.key}"
+  s3_object_version = "${aws_s3_bucket_object.package.version_id}"
 }
 
 resource aws_lambda_permission invoke {
@@ -115,7 +123,7 @@ resource aws_lambda_permission invoke {
 
 resource aws_s3_bucket bucket {
   acl    = "private"
-  bucket = "boston.techworkerscoalition.org"
+  bucket = "${var.s3_bucket}"
 
   server_side_encryption_configuration {
     rule {
@@ -126,11 +134,20 @@ resource aws_s3_bucket bucket {
   }
 }
 
-resource aws_s3_bucket_object event_2018_10_28 {
+resource aws_s3_bucket_object package {
+  bucket       = "${aws_s3_bucket.bucket.bucket}"
+  content_type = "application/zip"
+  etag         = "${md5(file("dist/package.zip"))}"
+  key          = "website/package.zip"
+  source       = "dist/package.zip"
+}
+
+resource aws_s3_bucket_object assets {
+  count        = "${length(local.assets)}"
   acl          = "public-read"
   bucket       = "${aws_s3_bucket.bucket.bucket}"
-  content_type = "image/jpeg"
-  etag         = "${md5(file("assets/event-2018-10-28.jpeg"))}"
-  key          = "website/assets/event-2018-10-28.jpeg"
-  source       = "assets/event-2018-10-28.jpeg"
+  content_type = "image/png"
+  etag         = "${md5(file("src/${element(local.assets, count.index)}"))}"
+  key          = "website/${element(local.assets, count.index)}"
+  source       = "src/${element(local.assets, count.index)}"
 }
