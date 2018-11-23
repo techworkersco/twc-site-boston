@@ -12,7 +12,7 @@ Source the `.env` file:
 source .env
 ```
 
-Run a development server to test with:
+Run a development server with:
 
 ```bash
 npm start
@@ -28,21 +28,27 @@ Build the package with:
 npm run init
 ```
 
-Which is a shortcut for:
-
-```bash
-terraform init
-docker-compose run --rm build
-docker-compose down
-```
-
 Deploy to AWS with:
 
 ```bash
 npm run deploy
 ```
 
-Which is a shortcut for [`terraform apply`](https://terraform.io)
+This project uses [Docker](https://docker.com) [Terraform](https://terraform.io) to build and deploy a package for AWS Lambda.
+
+That is to say, the `npm` scripts above are shortcuts for:
+
+```bash
+# Initialize Terraform
+terraform init
+
+# Build a package for AWS Lambda
+docker-compose run --rm build
+docker-compose down
+
+# Deploy to AWS
+terraform apply
+```
 
 ## Infrastructure
 
