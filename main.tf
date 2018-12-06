@@ -3,7 +3,7 @@ provider archive {
 }
 
 provider aws {
-  version    = "~> 1.46"
+  version    = "~> 1.50"
   access_key = "${var.aws_access_key_id}"
   secret_key = "${var.aws_secret_access_key}"
   profile    = "${var.aws_profile}"
@@ -15,6 +15,7 @@ locals {
   assets = [
     "assets/event-2018-10-28.png",
     "assets/event-2018-12-09.png",
+    "assets/event-2018-12-11.png",
   ]
 }
 
