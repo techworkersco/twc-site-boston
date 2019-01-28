@@ -34,8 +34,8 @@ app.get('/', (req, res) => {
     timeMin:      new Date(),
   }).then((data) => {
     res.render('index', {
-      calendarId: encodeURIComponent(GOOGLE_CALENDAR_ID),
-      events:     data.data.items,
+      events: data.data.items,
+      host:   HOST,
     });
   });
 });
@@ -46,7 +46,7 @@ app.get('/calendar', (req, res) => {
 
 app.get('/calendar/google', (req, res) => {
   if (req.useragent.isMobile) {
-    res.render('mobile', {id: GOOGLE_CALENDAR_ID});
+    res.render('mobile', {id: GOOGLE_CALENDAR_ID, host: HOST});
   } else {
     res.redirect(getGoogleUrl(GOOGLE_CALENDAR_ID));
   }
