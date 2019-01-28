@@ -122,6 +122,14 @@ resource aws_lambda_function lambda {
   s3_key            = "${aws_s3_bucket_object.package.key}"
   s3_object_version = "${aws_s3_bucket_object.package.version_id}"
   tags              = "${local.tags}"
+
+  environment {
+    variables {
+      GOOGLE_API_KEY     = "${var.google_api_key}"
+      GOOGLE_CALENDAR_ID = "${var.google_calendar_id}"
+      HOST               = "${var.host}"
+    }
+  }
 }
 
 resource aws_lambda_permission invoke {

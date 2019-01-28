@@ -18,6 +18,19 @@ variable aws_region {
   default     = "us-east-1"
 }
 
+variable google_api_key {
+  description = "Google API key."
+}
+
+variable google_calendar_id {
+  description = "Google Calendar ID."
+}
+
+variable host {
+  description = "Host."
+  default     = "https://boston.techworkerscoalition.org/"
+}
+
 variable release {
   description = "Release tag."
 }

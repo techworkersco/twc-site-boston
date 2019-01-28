@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include head.ejs %>
+
+  <body>
+    <div class="main-wrapper">
+
+      <%- include header.ejs %>
+
+      <main>
+
+        <h1>Subscribe to Calendar</h1>
+
+        <div class="container">
+
+          <div class="row">
+            <p>
+              This page will help you decide how you want to subscribe to this
+              Google Calendar. Share the URL to help others subscribe.
+            </p>
+          </div>
+
+          <br/>
+
+          <div class="row">
+            <div class="six columns">
+              <a class="button" href="/calendar/google">Google Calendar</a>
+              <p>
+                If you already use <a target="_blank" href="https://calendars.google.com/">Google Calendar</a>
+                to manage your events from the web or on your mobile device,
+                this option will add a calendar to your existing calendars in
+                Google.
+              </p>
+              <p>
+                Unfortunately the subscription link will only work from a
+                laptop or desktop computer. If you are on your phone or tablet,
+                bookmark this page and re-visit from a personal computer.
+              </p>
+            </div>
+
+            <div class="six columns">
+              <a class="button" href="/calendar/webcal">iCalendar</a>
+              <p>
+                If you don't have a Google account, or don't wish to use Google
+                Calendar, you may opt to subscribe with <a target="_blank" href="https://en.wikipedia.org/wiki/ICalendar">iCalendar</a>.
+                iCalendar is an open standard file format supported by many
+                calendar apps &mdash; in particular iPhones &amp; iPads.
+              </p>
+              <p>
+                iCalendar links will work from any device including handheld,
+                laptop &amp; desktop computers.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+    <%- include footer.ejs %>
+
+  </body>
+</html>

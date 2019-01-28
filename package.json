@@ -2,7 +2,9 @@
   "dependencies": {
     "aws-serverless-express": "^3.3.5",
     "ejs": "^2.6.1",
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "express-useragent": "^1.0.12",
+    "googleapis": "^36.0.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.395.0",
