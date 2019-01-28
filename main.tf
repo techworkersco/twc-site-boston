@@ -3,46 +3,43 @@ provider archive {
 }
 
 provider aws {
-  version    = "~> 1.50"
   access_key = "${var.aws_access_key_id}"
-  secret_key = "${var.aws_secret_access_key}"
   profile    = "${var.aws_profile}"
   region     = "${var.aws_region}"
+  secret_key = "${var.aws_secret_access_key}"
+  version    = "~> 1.50"
 }
 
 locals {
-  package = "website-${var.version}.zip"
+  package = "website-${var.release}.zip"
   assets = [
     "assets/event-2018-10-28.png",
     "assets/event-2018-12-09.png",
     "assets/event-2018-12-11.png",
   ]
+
+  tags {
+    App     = "boston.techworkerscoalition.org"
+    Repo    = "${var.repo}"
+    Release = "${var.release}"
+  }
 }
 
 data archive_file package {
   output_path = "${path.module}/dist/${local.package}"
-  source_dir  = "${path.module}/src"
+  source_dir  = "${path.module}/build"
   type        = "zip"
 }
 
-data aws_caller_identity current {
-}
-
-data aws_iam_policy_document assume_role {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
+data aws_iam_role role {
+  name = "AWSLambdaBasicExecution"
 }
 
 resource aws_acm_certificate cert {
   domain_name               = "boston.techworkerscoalition.org"
   subject_alternative_names = ["*.boston.techworkerscoalition.org"]
   validation_method         = "DNS"
+  tags                      = "${local.tags}"
 }
 
 resource aws_api_gateway_deployment api {
@@ -111,6 +108,7 @@ resource aws_api_gateway_rest_api api {
 resource aws_cloudwatch_log_group logs {
   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   retention_in_days = 30
+  tags              = "${local.tags}"
 }
 
 resource aws_lambda_function lambda {
@@ -118,24 +116,25 @@ resource aws_lambda_function lambda {
   function_name     = "website"
   handler           = "lambda.handler"
   memory_size       = 512
-  role              = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AWSLambdaBasicExecution"
+  role              = "${data.aws_iam_role.role.arn}"
   runtime           = "nodejs8.10"
   s3_bucket         = "${aws_s3_bucket_object.package.bucket}"
   s3_key            = "${aws_s3_bucket_object.package.key}"
   s3_object_version = "${aws_s3_bucket_object.package.version_id}"
+  tags              = "${local.tags}"
 }
 
 resource aws_lambda_permission invoke {
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.lambda.arn}"
   principal     = "apigateway.amazonaws.com"
-  statement_id  = "AllowAPIGatewayInvoke"
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
 }
 
 resource aws_s3_bucket bucket {
   acl    = "private"
   bucket = "${var.s3_bucket}"
+  tags   = "${local.tags}"
 
   server_side_encryption_configuration {
     rule {
@@ -152,6 +151,7 @@ resource aws_s3_bucket_object package {
   etag         = "${data.archive_file.package.output_md5}"
   key          = "website/${local.package}"
   source       = "${data.archive_file.package.output_path}"
+  tags         = "${local.tags}"
 }
 
 resource aws_s3_bucket_object assets {
@@ -162,4 +162,5 @@ resource aws_s3_bucket_object assets {
   etag         = "${md5(file("${element(local.assets, count.index)}"))}"
   key          = "website/${element(local.assets, count.index)}"
   source       = "${element(local.assets, count.index)}"
+  tags         = "${local.tags}"
 }

@@ -1,7 +1,17 @@
 {
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.395.0",
+    "dotenv": "^6.2.0"
+  },
+  "private": true,
   "scripts": {
-    "start": "cd src && npm start",
-    "init": "terraform init && docker-compose run --rm build && docker-compose down",
-    "deploy": "terraform apply"
+    "build": "docker-compose run build && docker-compose down",
+    "deploy": "terraform apply",
+    "init": "npm run build && terraform init"
   }
 }

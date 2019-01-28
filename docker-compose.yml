@@ -1,7 +1,18 @@
 version: '3'
 services:
-  build:
-    command: npm install --production
+  npm:
+    entrypoint: npm
     image: lambci/lambda:build-nodejs8.10
     volumes:
-    - ./src:/var/task
+    - ./:/var/task
+  build:
+    command: >-
+      sh -c "
+        mkdir -p build &&
+        cp -r app.js lambda.js package.json package-lock.json views build/ &&
+        cd build &&
+        npm install --production
+      "
+    image: lambci/lambda:build-nodejs8.10
+    volumes:
+    - ./:/var/task

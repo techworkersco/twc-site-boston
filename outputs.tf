@@ -18,7 +18,7 @@ output lambda_function_name {
   value       = "${aws_lambda_function.lambda.function_name}"
 }
 
-output s3_bucket{
+output s3_bucket {
   description = "S3 bucket."
   value       = "${aws_s3_bucket.bucket.bucket}"
 }

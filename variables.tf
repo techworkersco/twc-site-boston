@@ -18,6 +18,15 @@ variable aws_region {
   default     = "us-east-1"
 }
 
+variable release {
+  description = "Release tag."
+}
+
+variable repo {
+  description = "Project repository."
+  default     = "https://github.com/techworkersco/twc-site-boston.git"
+}
+
 variable s3_bucket {
   description = "S3 bucket for Lambda package."
   default     = "boston.techworkerscoalition.org"
@@ -26,8 +35,4 @@ variable s3_bucket {
 variable s3_key {
   description = "S3 key for Lambda package."
   default     = "website/package.zip"
-}
-
-variable version {
-  description = "Website CalVer version."
 }
