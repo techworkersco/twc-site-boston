@@ -11,7 +11,6 @@ provider aws {
 }
 
 locals {
-  package = "website-${var.release}.zip"
   assets = [
     "assets/event-2018-10-28.png",
     "assets/event-2018-12-09.png",
@@ -26,7 +25,7 @@ locals {
 }
 
 data archive_file package {
-  output_path = "${path.module}/dist/${local.package}"
+  output_path = "${path.module}/dist/package.zip"
   source_dir  = "${path.module}/build"
   type        = "zip"
 }
@@ -97,8 +96,8 @@ resource aws_api_gateway_resource proxy {
 }
 
 resource aws_api_gateway_rest_api api {
-  description            = "Boston TWC website"
-  name                   = "website"
+  description = "Boston TWC website"
+  name        = "website"
 
   endpoint_configuration {
     types = ["EDGE"]
@@ -112,16 +111,15 @@ resource aws_cloudwatch_log_group logs {
 }
 
 resource aws_lambda_function lambda {
-  description       = "Boston TWC Website"
-  function_name     = "website"
-  handler           = "lambda.handler"
-  memory_size       = 512
-  role              = "${data.aws_iam_role.role.arn}"
-  runtime           = "nodejs8.10"
-  s3_bucket         = "${aws_s3_bucket_object.package.bucket}"
-  s3_key            = "${aws_s3_bucket_object.package.key}"
-  s3_object_version = "${aws_s3_bucket_object.package.version_id}"
-  tags              = "${local.tags}"
+  description      = "Boston TWC Website"
+  filename         = "${data.archive_file.package.output_path}"
+  function_name    = "website"
+  handler          = "lambda.handler"
+  memory_size      = 512
+  role             = "${data.aws_iam_role.role.arn}"
+  runtime          = "nodejs8.10"
+  source_code_hash = "${data.archive_file.package.output_base64sha256}"
+  tags             = "${local.tags}"
 
   environment {
     variables {
@@ -151,15 +149,6 @@ resource aws_s3_bucket bucket {
       }
     }
   }
-}
-
-resource aws_s3_bucket_object package {
-  bucket       = "${aws_s3_bucket.bucket.bucket}"
-  content_type = "application/zip"
-  etag         = "${data.archive_file.package.output_md5}"
-  key          = "website/${local.package}"
-  source       = "${data.archive_file.package.output_path}"
-  tags         = "${local.tags}"
 }
 
 resource aws_s3_bucket_object assets {
