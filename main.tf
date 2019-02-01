@@ -18,7 +18,7 @@ locals {
   ]
 
   tags {
-    App     = "boston.techworkerscoalition.org"
+    App     = "${var.app}"
     Repo    = "${var.repo}"
     Release = "${var.release}"
   }
@@ -30,8 +30,23 @@ data archive_file package {
   type        = "zip"
 }
 
-data aws_iam_role role {
-  name = "AWSLambdaBasicExecution"
+data aws_secretsmanager_secret secret {
+  name = "${var.app}"
+}
+
+data aws_iam_policy_document secret {
+  statement {
+    sid       = "GetSecretValue"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["${data.aws_secretsmanager_secret.secret.arn}"]
+  }
+}
+
+module role {
+  source          = "amancevice/lambda-basic-execution-role/aws"
+  version         = "0.0.2"
+  name            = "${var.app}"
+  inline_policies = ["${data.aws_iam_policy_document.secret.json}"]
 }
 
 resource aws_acm_certificate cert {
@@ -116,16 +131,15 @@ resource aws_lambda_function lambda {
   function_name    = "website"
   handler          = "lambda.handler"
   memory_size      = 512
-  role             = "${data.aws_iam_role.role.arn}"
+  role             = "${module.role.role_arn}"
   runtime          = "nodejs8.10"
   source_code_hash = "${data.archive_file.package.output_base64sha256}"
   tags             = "${local.tags}"
 
   environment {
     variables {
-      GOOGLE_API_KEY     = "${var.google_api_key}"
-      GOOGLE_CALENDAR_ID = "${var.google_calendar_id}"
-      HOST               = "${var.host}"
+      AWS_SECRET = "${data.aws_secretsmanager_secret.secret.name}"
+      HOST       = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}/"
     }
   }
 }
@@ -139,7 +153,7 @@ resource aws_lambda_permission invoke {
 
 resource aws_s3_bucket bucket {
   acl    = "private"
-  bucket = "${var.s3_bucket}"
+  bucket = "${aws_api_gateway_domain_name.custom_domain.domain_name}"
   tags   = "${local.tags}"
 
   server_side_encryption_configuration {
