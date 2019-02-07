@@ -6,10 +6,14 @@ Local Boston subdomain website.
 
 Copy both [`./.env.example`](./.env.example) and [`.terraform.tfvars.example`](./terraform.tfvars.example) to `.env` and `terraform.tfvars`, respectively. Fill both files with your AWS keys and S3 information.
 
-Source the `.env` file:
+Install dependencies:
 
 ```bash
-source .env
+npm install
+
+# or..
+
+docker-compose run npm install
 ```
 
 Run a development server with:
@@ -31,7 +35,7 @@ npm run init
 Deploy to AWS with:
 
 ```bash
-npm run deploy
+npm run apply
 ```
 
 This project uses [Docker](https://docker.com) [Terraform](https://terraform.io) to build and deploy a package for AWS Lambda.
@@ -39,12 +43,8 @@ This project uses [Docker](https://docker.com) [Terraform](https://terraform.io)
 That is to say, the `npm` scripts above are shortcuts for:
 
 ```bash
-# Initialize Terraform
-terraform init
-
-# Build a package for AWS Lambda
-docker-compose run --rm build
-docker-compose down
+# Build package and initialize Terraform
+docker-compose run build && terraform init
 
 # Deploy to AWS
 terraform apply

@@ -13,7 +13,8 @@
   "private": true,
   "scripts": {
     "build": "docker-compose run build && docker-compose down",
-    "deploy": "terraform apply",
+    "apply": "terraform apply",
+    "plan": "terraform plan",
     "init": "npm run build && terraform init"
   }
 }

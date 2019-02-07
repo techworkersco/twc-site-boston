@@ -130,11 +130,12 @@ resource aws_lambda_function lambda {
   filename         = "${data.archive_file.package.output_path}"
   function_name    = "website"
   handler          = "lambda.handler"
-  memory_size      = 512
+  memory_size      = 2048
   role             = "${module.role.role_arn}"
   runtime          = "nodejs8.10"
   source_code_hash = "${data.archive_file.package.output_base64sha256}"
   tags             = "${local.tags}"
+  timeout          = 30
 
   environment {
     variables {
