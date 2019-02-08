@@ -140,7 +140,6 @@ resource aws_lambda_function lambda {
   environment {
     variables {
       AWS_SECRET = "${data.aws_secretsmanager_secret.secret.name}"
-      HOST       = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}/"
     }
   }
 }

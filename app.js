@@ -7,7 +7,6 @@ const {google}  = require('googleapis');
 
 const GOOGLE_API_KEY     = process.env.GOOGLE_API_KEY;
 const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
-const HOST               = process.env.HOST;
 
 const getGoogleUrl = (id) => {
   var cid = Buffer.from(id).toString('base64').replace(/\n|=+$/, '');
@@ -33,20 +32,17 @@ app.get('/', (req, res) => {
     singleEvents: true,
     timeMin:      new Date(),
   }).then((data) => {
-    res.render('index', {
-      events: data.data.items,
-      host:   HOST,
-    });
+    res.render('index', {events: data.data.items});
   });
 });
 
 app.get('/calendar', (req, res) => {
-  res.render('calendar', {id: GOOGLE_CALENDAR_ID, host: HOST});
+  res.render('calendar', {id: GOOGLE_CALENDAR_ID});
 });
 
 app.get('/calendar/google', (req, res) => {
   if (req.useragent.isMobile) {
-    res.render('mobile', {id: GOOGLE_CALENDAR_ID, host: HOST});
+    res.render('mobile', {id: GOOGLE_CALENDAR_ID});
   } else {
     res.redirect(getGoogleUrl(GOOGLE_CALENDAR_ID));
   }
