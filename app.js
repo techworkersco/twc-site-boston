@@ -29,6 +29,7 @@ app.get('/', (req, res) => {
   gcal.events.list({
     calendarId:   GOOGLE_CALENDAR_ID,
     //maxResults:   3,
+    orderBy:      'startTime',
     singleEvents: true,
     timeMin:      new Date(),
   }).then((data) => {
