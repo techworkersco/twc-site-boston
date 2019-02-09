@@ -7,7 +7,7 @@
     "googleapis": "^36.0.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.395.0",
+    "aws-sdk": "^2.400.0",
     "dotenv": "^6.2.0"
   },
   "private": true,
