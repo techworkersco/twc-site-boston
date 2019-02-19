@@ -15,6 +15,7 @@ locals {
     "assets/event-2018-10-28.png",
     "assets/event-2018-12-09.png",
     "assets/event-2018-12-11.png",
+    "assets/event-2019-02-24.png",
   ]
 
   tags {
