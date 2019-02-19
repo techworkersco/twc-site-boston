@@ -35,7 +35,9 @@
                 <%= event.location %>
               </a>
             </sub>
-            <p><%= event.description %></p>
+            <% event.description.split(/\n\n/).map(p => { %>
+              <p><%= p %></p>
+            <% }); %>
             <!-- <%= JSON.stringify(event) %> -->
           <% }); %>
         </div>
