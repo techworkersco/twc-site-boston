@@ -36,7 +36,7 @@
               </a>
             </sub>
             <% event.description.split(/\n\n/).map(p => { %>
-              <p><%= p %></p>
+              <p><%- p %></p>
             <% }); %>
             <!-- <%= JSON.stringify(event) %> -->
           <% }); %>
