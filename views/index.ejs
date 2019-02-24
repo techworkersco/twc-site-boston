@@ -10,13 +10,15 @@
       <main class="container">
         <h1>Boston Tech Workers Coalition</h1>
 
+        <!-- Next Event Flyer -->
         <div class="flyer">
           <a href="https://s3.amazonaws.com/boston.techworkerscoalition.org/website/assets/event-2019-02-24.png">
             <img alt="TWC event" src="https://s3.amazonaws.com/boston.techworkerscoalition.org/website/assets/event-2019-02-24.png"/>
           </a>
         </div>
 
-        <div>
+        <!-- Events -->
+        <div class="events">
           <% events.map((event) => { %>
             <h3><%= event.summary %></h3>
             <strong class="red">
@@ -38,22 +40,24 @@
             <% event.description.split(/\n\n/).map(p => { %>
               <p><%- p %></p>
             <% }); %>
-            <!-- <%= JSON.stringify(event) %> -->
+            <br/>
           <% }); %>
         </div>
 
-        <hr/>
-
-        <div class="columns">
-          <div class="column is-1">
-            <a href="/calendar">
-              Subscribe to our Calendar
-            </a>
-          </div>
-          <div class="column is-1">
-            <a style="float: right;" href="https://goo.gl/forms/wQ7Q2hqSepNouXBp2">
-              Propose a Learning Club Event
-            </a>
+        <!-- Events Footer -->
+        <div class="events-footer">
+          <hr/>
+          <div class="columns">
+            <div class="column is-1">
+              <a href="/calendar">
+                Subscribe to our Calendar
+              </a>
+            </div>
+            <div class="column is-1">
+              <a style="float: right;" href="https://goo.gl/forms/wQ7Q2hqSepNouXBp2">
+                Propose a Learning Club Event
+              </a>
+            </div>
           </div>
         </div>
 

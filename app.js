@@ -28,7 +28,7 @@ app.set('view engine', 'ejs');
 app.get('/', (req, res) => {
   gcal.events.list({
     calendarId:   GOOGLE_CALENDAR_ID,
-    //maxResults:   3,
+    maxResults:   3,
     orderBy:      'startTime',
     singleEvents: true,
     timeMin:      new Date(),
