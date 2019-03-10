@@ -7,7 +7,7 @@ provider aws {
   profile    = "${var.aws_profile}"
   region     = "${var.aws_region}"
   secret_key = "${var.aws_secret_access_key}"
-  version    = "~> 1.50"
+  version    = "~> 2.1"
 }
 
 locals {
@@ -25,9 +25,15 @@ locals {
   }
 }
 
-data archive_file package {
-  output_path = "${path.module}/dist/package.zip"
-  source_dir  = "${path.module}/build"
+data archive_file app {
+  output_path = "${path.module}/dist/app.zip"
+  source_dir  = "${path.module}/build/app"
+  type        = "zip"
+}
+
+data archive_file layer {
+  output_path = "${path.module}/dist/layer.zip"
+  source_dir  = "${path.module}/build/layer"
   type        = "zip"
 }
 
@@ -128,13 +134,14 @@ resource aws_cloudwatch_log_group logs {
 
 resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
-  filename         = "${data.archive_file.package.output_path}"
+  filename         = "${data.archive_file.app.output_path}"
   function_name    = "website"
   handler          = "lambda.handler"
+  layers           = ["${aws_lambda_layer_version.layer.arn}"]
   memory_size      = 2048
   role             = "${module.role.role_arn}"
   runtime          = "nodejs8.10"
-  source_code_hash = "${data.archive_file.package.output_base64sha256}"
+  source_code_hash = "${data.archive_file.app.output_base64sha256}"
   tags             = "${local.tags}"
   timeout          = 30
 
@@ -143,6 +150,14 @@ resource aws_lambda_function lambda {
       AWS_SECRET = "${data.aws_secretsmanager_secret.secret.name}"
     }
   }
+}
+
+resource aws_lambda_layer_version layer {
+  compatible_runtimes = ["nodejs8.10"]
+  description         = "Website dependencies"
+  filename            = "${data.archive_file.layer.output_path}"
+  layer_name          = "website"
+  source_code_hash    = "${data.archive_file.layer.output_base64sha256}"
 }
 
 resource aws_lambda_permission invoke {

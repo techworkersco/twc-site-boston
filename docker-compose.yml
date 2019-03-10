@@ -1,16 +1,20 @@
 version: '3'
 services:
+
   npm:
     entrypoint: npm
     image: lambci/lambda:build-nodejs8.10
     volumes:
     - ./:/var/task
+
   build:
     command: >-
       sh -c "
-        mkdir -p build &&
-        cp -r app.js lambda.js package.json package-lock.json views build/ &&
-        cd build &&
+        rm -rf build &&
+        mkdir -p build/layer/nodejs build/app &&
+        cp -r app.js lambda.js views build/app/ &&
+        cp package.json package-lock.json build/layer/nodejs/ &&
+        cd build/layer/nodejs &&
         npm install --production
       "
     image: lambci/lambda:build-nodejs8.10
