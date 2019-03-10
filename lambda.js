@@ -8,7 +8,7 @@ const secretsmanager = new AWS.SecretsManager();
 
 let server;
 
-const createServer = async (options) => {
+async function createServer(options) {
   // Get secret JSON
   const secret = await secretsmanager.getSecretValue(options).promise();
 
