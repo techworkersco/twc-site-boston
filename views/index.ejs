@@ -39,7 +39,7 @@
                 <%= event.location %>
               </a>
             </sub>
-            <% event.description.split(/\n\n/).map(p => { %>
+            <% (event.description || '').split(/\n\n/).map(p => { %>
               <p><%- p %></p>
             <% }); %>
             <br/>
