@@ -1,5 +1,3 @@
-package := $(shell npm pack --dry-run --quiet)
-
 .PHONY: lock build dist
 
 package-lock.json: package.json

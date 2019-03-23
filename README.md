@@ -10,10 +10,6 @@ Install dependencies:
 
 ```bash
 npm install
-
-# or..
-
-docker-compose run npm install
 ```
 
 Run a development server with:
