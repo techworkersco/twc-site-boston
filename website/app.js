@@ -1,7 +1,5 @@
 'use strict';
 const express   = require('express');
-const fs        = require('fs');
-const path      = require('path');
 const useragent = require('express-useragent');
 const {google}  = require('googleapis');
 
@@ -22,7 +20,7 @@ const app  = express();
 const gcal = google.calendar({version: 'v3', auth: GOOGLE_API_KEY});
 
 app.use(useragent.express());
-app.use(express.static('./views'));
+app.set('views', `${__dirname}/views`);
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {

@@ -1,22 +1,27 @@
 version: '3'
 services:
 
-  npm:
-    entrypoint: npm
-    image: lambci/lambda:build-nodejs8.10
-    volumes:
-    - ./:/var/task
-
   build:
-    command: >-
-      sh -c "
-        rm -rf build &&
-        mkdir -p build/layer/nodejs build/app &&
-        cp -r app.js lambda.js views build/app/ &&
-        cp package.json package-lock.json build/layer/nodejs/ &&
-        cd build/layer/nodejs &&
-        npm install --production
-      "
+    command: npm install
     image: lambci/lambda:build-nodejs8.10
     volumes:
-    - ./:/var/task
+      - layer:/opt/nodejs
+      - ./:/var/task
+
+  dist:
+    command: zip -r - .
+    image: lambci/lambda:build-nodejs8.10
+    volumes:
+      - layer:/opt/nodejs
+    working_dir: /opt
+
+  test:
+    command: lambda.handler '{"path":"/"}'
+    env_file: .env
+    image: lambci/lambda:nodejs8.10
+    volumes:
+      - ./:/var/task
+      - layer:/opt/nodejs
+
+volumes:
+  layer:

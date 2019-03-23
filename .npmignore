@@ -1,4 +1,3 @@
-#  Local .terraform directories
 **/.terraform/*
 
 # .tfstate files
@@ -8,11 +7,13 @@
 # .tfvars files
 *.tfvars
 
-# .env
-.env
-
-# lambda package
+# app
+assets/
 build/
 dist/
-node_modules/
-*.zip
+secrets/
+*.tf
+*.tgz
+.env*
+Makefile
+docker-compose.yml

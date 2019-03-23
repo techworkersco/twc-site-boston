@@ -1,3 +1,12 @@
+terraform {
+  backend s3 {
+    bucket  = "boston.techworkerscoalition.org"
+    key     = "terraform/website.tfstate"
+    region  = "us-east-1"
+    profile = "twc"
+  }
+}
+
 provider archive {
   version = "~> 1.1"
 }
@@ -7,7 +16,7 @@ provider aws {
   profile    = "${var.aws_profile}"
   region     = "${var.aws_region}"
   secret_key = "${var.aws_secret_access_key}"
-  version    = "~> 2.1"
+  version    = "~> 2.2"
 }
 
 locals {
@@ -26,15 +35,9 @@ locals {
   }
 }
 
-data archive_file app {
-  output_path = "${path.module}/dist/app.zip"
-  source_dir  = "${path.module}/build/app"
-  type        = "zip"
-}
-
-data archive_file layer {
-  output_path = "${path.module}/dist/layer.zip"
-  source_dir  = "${path.module}/build/layer"
+data archive_file lambda {
+  output_path = "${path.module}/lambda.zip"
+  source_dir  = "${path.module}/website"
   type        = "zip"
 }
 
@@ -135,14 +138,14 @@ resource aws_cloudwatch_log_group logs {
 
 resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
-  filename         = "${data.archive_file.app.output_path}"
+  filename         = "${data.archive_file.lambda.output_path}"
   function_name    = "website"
   handler          = "lambda.handler"
   layers           = ["${aws_lambda_layer_version.layer.arn}"]
   memory_size      = 2048
   role             = "${module.role.role_arn}"
   runtime          = "nodejs8.10"
-  source_code_hash = "${data.archive_file.app.output_base64sha256}"
+  source_code_hash = "${data.archive_file.lambda.output_base64sha256}"
   tags             = "${local.tags}"
   timeout          = 30
 
@@ -156,9 +159,9 @@ resource aws_lambda_function lambda {
 resource aws_lambda_layer_version layer {
   compatible_runtimes = ["nodejs8.10"]
   description         = "Website dependencies"
-  filename            = "${data.archive_file.layer.output_path}"
+  filename            = "${path.module}/layer.zip"
   layer_name          = "website"
-  source_code_hash    = "${data.archive_file.layer.output_base64sha256}"
+  source_code_hash    = "${filebase64sha256("${path.module}/layer.zip")}"
 }
 
 resource aws_lambda_permission invoke {
@@ -191,4 +194,63 @@ resource aws_s3_bucket_object assets {
   key          = "website/${element(local.assets, count.index)}"
   source       = "${element(local.assets, count.index)}"
   tags         = "${local.tags}"
+}
+
+output cert_arn {
+  description = "ACM certificate ARN."
+  value       = "${aws_acm_certificate.cert.arn}"
+}
+
+output domain_name {
+  description = "API Gateway custom domain."
+  value       = "${aws_api_gateway_domain_name.custom_domain.domain_name}"
+}
+
+output lambda_function_arn {
+  description = "Lambda function ARN."
+  value       = "${aws_lambda_function.lambda.arn}"
+}
+
+output lambda_function_name {
+  description = "Lambda function name."
+  value       = "${aws_lambda_function.lambda.function_name}"
+}
+
+output s3_bucket {
+  description = "S3 bucket."
+  value       = "${aws_s3_bucket.bucket.bucket}"
+}
+
+variable aws_access_key_id {
+  description = "AWS access key ID."
+  default     = ""
+}
+
+variable aws_secret_access_key {
+  description = "AWS secret access key."
+  default     = ""
+}
+
+variable aws_profile {
+  description = "AWS profile name."
+  default     = ""
+}
+
+variable aws_region {
+  description = "AWS region."
+  default     = "us-east-1"
+}
+
+variable app {
+  description = "App name."
+  default     = "website"
+}
+
+variable release {
+  description = "Release tag."
+}
+
+variable repo {
+  description = "Project repository."
+  default     = "https://github.com/techworkersco/twc-site-boston.git"
 }
