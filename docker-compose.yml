@@ -2,7 +2,6 @@ version: '3'
 services:
 
   build:
-    command: npm install
     image: lambci/lambda:build-nodejs8.10
     volumes:
       - layer:/opt/nodejs
