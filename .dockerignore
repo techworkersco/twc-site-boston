@@ -1,0 +1,4 @@
+*
+!website/
+!package*.json
+!terraform.tf

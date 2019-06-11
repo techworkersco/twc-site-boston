@@ -25,13 +25,13 @@ Update the version in `terraform.tfvars` and use the custom `npm` scripts to bui
 Build the package with:
 
 ```bash
-npm run init
+make
 ```
 
 Deploy to AWS with:
 
 ```bash
-npm run apply
+make apply
 ```
 
 This project uses [Docker](https://docker.com) [Terraform](https://terraform.io) to build and deploy a package for AWS Lambda.

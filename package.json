@@ -1,23 +1,15 @@
 {
   "dependencies": {
-    "aws-serverless-express": "^3.3.5",
+    "aws-serverless-express": "^3.3.6",
     "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "express-useragent": "^1.0.12",
-    "googleapis": "^36.0.0"
+    "googleapis": "^40.0.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.400.0",
-    "dotenv": "^6.2.0"
+    "aws-sdk": "^2.473.0",
+    "dotenv": "^8.0.0"
   },
   "name": "boston.techworkerscoalition.org",
-  "private": true,
-  "scripts": {
-    "build": "make clean lock build dist",
-    "apply": "terraform apply",
-    "plan": "terraform plan",
-    "init": "npm run build && terraform init",
-    "start": "node website/server"
-  },
-  "version": "2019.3.22"
+  "private": true
 }

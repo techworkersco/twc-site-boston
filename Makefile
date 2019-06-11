@@ -1,18 +1,36 @@
-.PHONY: lock build dist
+name    := boston
+build   := $(shell git describe --tags --always)
+runtime := nodejs10.x
 
-package-lock.json: package.json
-	npm install --package-lock-only
+.PHONY: all apply clean shell
 
-lock: package-lock.json
+all: package-lock.json package.lambda.zip package.layer.zip
 
-build:
-	docker-compose run --rm build cp package*.json /opt/nodejs
-	docker-compose run --rm -w /opt/nodejs build npm install --production
+.docker:
+	mkdir -p $@
 
-layer.zip: package-lock.json
-	docker-compose run --rm -T dist > $@
+.docker/%: package.json website | .docker
+	docker build \
+	--build-arg AWS_ACCESS_KEY_ID \
+	--build-arg AWS_DEFAULT_REGION \
+	--build-arg AWS_SECRET_ACCESS_KEY \
+	--build-arg RUNTIME=$(runtime) \
+	--build-arg TF_VAR_release=$* \
+	--iidfile $@ \
+	--tag techworkersco/$(name):$* .
 
-dist: layer.zip
+package-lock.json: .docker/$(build)
+	docker run --rm -w /opt/nodejs/ $(shell cat $<) cat $@ > $@
+
+package.lambda.zip package.layer.zip: .docker/$(build)
+	docker run --rm -w /var/task/ $(shell cat $<) cat $@ > $@
+
+apply: .docker/$(build)
+	docker run --rm $(shell cat $<)
 
 clean:
-	docker-compose down --volumes
+	-docker image rm -f $(shell sed G .docker/*)
+	-rm -rf .docker *.zip
+
+shell: .docker/$(build)
+	docker run --rm -it $(shell cat $<) /bin/bash

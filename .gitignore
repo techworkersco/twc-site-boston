@@ -8,11 +8,8 @@
 # .tfvars files
 *.tfvars
 
-# .env
-.env
-
-# lambda package
-build/
-dist/
-node_modules/
+**/.docker/
+**/.terraform/
+**/node_modules/
+*.env
 *.zip
