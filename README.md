@@ -4,7 +4,7 @@ Local Boston subdomain website.
 
 ## Setup
 
-Copy both [`./.env.example`](./.env.example) and [`.terraform.tfvars.example`](./terraform.tfvars.example) to `.env` and `terraform.tfvars`, respectively. Fill both files with your AWS keys and S3 information.
+Copy `.env.example` to `.env` and fill with your AWS/Google keys and S3 information.
 
 Install dependencies:
 
@@ -20,35 +20,29 @@ npm start
 
 ## Build & Deploy
 
-Update the version in `terraform.tfvars` and use the custom `npm` scripts to build and deploy.
+You will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project. [Terraform](https://terraform.io) is used in Docker to manage infrastructure.
 
-Build the package with:
+Build the Lambda package with:
 
 ```bash
 make
 ```
 
-Deploy to AWS with:
+Generate a terraform plan with:
+
+```bash
+make plan
+```
+
+Update infrastructure with:
 
 ```bash
 make apply
 ```
 
-This project uses [Docker](https://docker.com) [Terraform](https://terraform.io) to build and deploy a package for AWS Lambda.
-
-That is to say, the `npm` scripts above are shortcuts for:
-
-```bash
-# Build package and initialize Terraform
-docker-compose run build && terraform init
-
-# Deploy to AWS
-terraform apply
-```
-
 ## Infrastructure
 
-The project will install the following AWS components:
+The project manages the following AWS components:
 
 - **Lambda** — A function to serve the website
 - **API Gateway** — Web service to invoke the Lambda
