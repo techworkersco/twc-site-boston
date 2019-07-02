@@ -3,15 +3,14 @@ ARG RUNTIME=nodejs10.x
 FROM lambci/lambda:build-${RUNTIME} AS build
 
 # Create Lambda package
-COPY website .
+COPY . .
 RUN npm install --production
-RUN zip -r /var/task/package.zip .
+RUN zip -r /var/task/package.zip node_modules website index.js package*.json
 
 # Validate terraform
 FROM lambci/lambda:build-${RUNTIME} AS test
 COPY --from=hashicorp/terraform:0.12.3 /bin/terraform /bin/
 COPY --from=build /var/task/ .
-COPY terraform.tf .
 RUN npm install
 RUN terraform fmt -check
 

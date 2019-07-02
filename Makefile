@@ -35,6 +35,7 @@ clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
 	-rm -rf .docker *.zip
 
+plan: all
 $(stages): %: .docker/$(build)@%
 
 $(shells): shell@%: %
