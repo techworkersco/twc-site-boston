@@ -28,15 +28,14 @@ all: package-lock.json package.zip
 package-lock.json package.zip: build
 	docker run --rm $(call digest,$<) cat $@ > $@
 
-apply: plan
-	docker run --rm $(call digest,$<)
+apply: plan .env
+	docker run --rm --env-file .env $(call digest,$<)
 
 clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
 	-rm -rf .docker *.zip
 
-plan: all
 $(stages): %: .docker/$(build)@%
 
-$(shells): shell@%: %
-	docker run --rm -it $(call digest,$<) /bin/bash
+$(shells): shell@%: % .env
+	docker run --rm -it --env-file .env $(call digest,$<) /bin/bash
