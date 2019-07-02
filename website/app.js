@@ -35,6 +35,10 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/events', (req, res) => {
+  res.redirect('/calendar');
+});
+
 app.get('/calendar', (req, res) => {
   res.render('calendar', {id: GOOGLE_CALENDAR_ID});
 });
