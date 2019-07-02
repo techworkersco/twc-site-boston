@@ -126,14 +126,13 @@ resource aws_cloudwatch_log_group logs {
 
 resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
-  filename         = "${path.module}/package.lambda.zip"
+  filename         = "${path.module}/package.zip"
   function_name    = "website"
   handler          = "lambda.handler"
-  layers           = [aws_lambda_layer_version.layer.arn]
   memory_size      = 2048
   role             = module.role.role_arn
   runtime          = "nodejs10.x"
-  source_code_hash = filebase64sha256("${path.module}/package.layer.zip")
+  source_code_hash = filebase64sha256("${path.module}/package.zip")
   tags             = local.tags
   timeout          = 30
 
@@ -142,14 +141,6 @@ resource aws_lambda_function lambda {
       AWS_SECRET = data.aws_secretsmanager_secret.secret.name
     }
   }
-}
-
-resource aws_lambda_layer_version layer {
-  compatible_runtimes = ["nodejs10.x"]
-  description         = "Website dependencies"
-  filename            = "${path.module}/package.layer.zip"
-  layer_name          = "website"
-  source_code_hash    = filebase64sha256("${path.module}/package.layer.zip")
 }
 
 resource aws_lambda_permission invoke {
