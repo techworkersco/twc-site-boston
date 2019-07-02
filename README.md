@@ -40,6 +40,12 @@ Update infrastructure with:
 make apply
 ```
 
+Clean up any generated artifacts with:
+
+```bash
+make clean
+```
+
 ## Infrastructure
 
 The project manages the following AWS components:

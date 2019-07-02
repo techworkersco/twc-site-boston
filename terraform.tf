@@ -128,7 +128,7 @@ resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
   filename         = "${path.module}/package.zip"
   function_name    = "website"
-  handler          = "lambda.handler"
+  handler          = "index.handler"
   memory_size      = 2048
   role             = module.role.role_arn
   runtime          = "nodejs10.x"
