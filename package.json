@@ -11,5 +11,8 @@
     "dotenv": "^8.0.0"
   },
   "name": "boston.techworkerscoalition.org",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  }
 }
