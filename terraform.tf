@@ -210,5 +210,5 @@ variable release {
 
 variable repo {
   description = "Project repository."
-  default     = "https://github.com/techworkersco/twc-site-boston.git"
+  default     = "https://github.com/techworkersco/twc-site-boston"
 }
