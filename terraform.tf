@@ -139,6 +139,7 @@ resource aws_lambda_function lambda {
   environment {
     variables = {
       AWS_SECRET = data.aws_secretsmanager_secret.secret.name
+      s3_bucket  = aws_s3_bucket.bucket.bucket
     }
   }
 }

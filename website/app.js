@@ -6,6 +6,8 @@ const {google}  = require('googleapis');
 const GOOGLE_API_KEY     = process.env.GOOGLE_API_KEY;
 const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
 
+const S3_BUCKET = process.env.S3_BUCKET;
+
 const getGoogleUrl = (id) => {
   var cid = Buffer.from(id).toString('base64').replace(/\n|=+$/, '');
   return `https://calendar.google.com/calendar/r?cid=${cid}`;
@@ -33,6 +35,10 @@ app.get('/', (req, res) => {
   }).then((data) => {
     res.render('index', {events: data.data.items});
   });
+});
+
+app.get('/assets/*', (req, res) => {
+  res.redirect(`http://${S3_BUCKET}.s3.amazonaws.com/website${req.path}`);
 });
 
 app.get('/events', (req, res) => {
