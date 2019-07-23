@@ -3,7 +3,6 @@ runtime := nodejs10.x
 stages  := build test plan
 build   := $(shell git describe --tags --always)
 shells  := $(foreach stage,$(stages),shell@$(stage))
-digest   = $(shell cat .docker/$(build)@$(1))
 
 .PHONY: all apply clean $(stages) $(shells)
 
@@ -25,11 +24,11 @@ all: package-lock.json package.zip
 	--tag techworkersco/$(name):$(build)-$* \
 	--target $* .
 
-package-lock.json package.zip: build
-	docker run --rm $(call digest,$<) cat $@ > $@
+package-lock.json package.zip: .docker/$(build)@build
+	docker run --rm $(shell cat $<) cat $@ > $@
 
-apply: plan .env
-	docker run --rm --env-file .env $(call digest,$<)
+apply: .docker/$(build)@plan .env
+	docker run --rm --env-file .env $(shell cat $<)
 
 clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
@@ -37,5 +36,8 @@ clean:
 
 $(stages): %: .docker/$(build)@%
 
-$(shells): shell@%: % .env
-	docker run --rm -it --env-file .env $(call digest,$<) /bin/bash
+$(shells): shell@%: .docker/$(build)@% .env
+	docker run --rm -it \
+	--entrypoint /bin/bash \
+	--env-file .env \
+	$(shell cat $<)

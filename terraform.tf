@@ -139,7 +139,7 @@ resource aws_lambda_function lambda {
   environment {
     variables = {
       AWS_SECRET = data.aws_secretsmanager_secret.secret.name
-      s3_bucket  = aws_s3_bucket.bucket.bucket
+      S3_BUCKET  = aws_s3_bucket.bucket.bucket
     }
   }
 }
@@ -171,7 +171,7 @@ resource null_resource assets {
   }
 
   provisioner "local-exec" {
-    command = "aws s3 sync assets s3://${aws_s3_bucket.bucket.bucket}/website/assets/"
+    command = "aws s3 sync assets s3://${aws_s3_bucket.bucket.bucket}/website/assets/ --acl public-read"
   }
 }
 

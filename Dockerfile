@@ -9,7 +9,7 @@ RUN zip -r /var/task/package.zip node_modules website index.js package*.json
 
 # Validate terraform
 FROM lambci/lambda:build-${RUNTIME} AS test
-COPY --from=hashicorp/terraform:0.12.3 /bin/terraform /bin/
+COPY --from=hashicorp/terraform:0.12.5 /bin/terraform /bin/
 COPY --from=build /var/task/ .
 RUN npm install
 RUN terraform fmt -check
