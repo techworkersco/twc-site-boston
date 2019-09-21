@@ -1,0 +1,7 @@
+language: node_js
+node:
+- '10'
+install:
+- make build
+script:
+- make plan
