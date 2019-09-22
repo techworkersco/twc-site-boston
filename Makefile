@@ -5,9 +5,9 @@ stages    := build plan
 build     := $(shell git describe --tags --always)
 shells    := $(foreach stage,$(stages),shell@$(stage))
 
-.PHONY: all apply clean $(stages) $(shells)
+.PHONY: all apply clean up $(stages) $(shells)
 
-all: package-lock.json package.zip plan
+all: package-lock.json package.zip
 
 .docker:
 	mkdir -p $@
@@ -34,6 +34,13 @@ apply: .docker/$(build)@plan .env
 clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
 	-rm -rf .docker *.zip
+
+up: .docker/$(build)@build .env
+	docker run --rm -it \
+	--entrypoint npm \
+	--env-file .env \
+	--publish 3000:3000 \
+	$(shell cat $<) start
 
 $(stages): %: .docker/$(build)@%
 

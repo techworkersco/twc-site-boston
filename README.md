@@ -2,48 +2,65 @@
 
 Local Boston subdomain website.
 
-## Setup
+## Quickstart
 
-Copy `.env.example` to `.env` and fill with your AWS/Google keys and S3 information.
+First, copy `.env.example` to `.env` and fill in the appropriate values.
 
-Install dependencies:
+Then run a local web server natively or with Docker.
+
+**Native**
+
+Install node modules and start server:
 
 ```bash
 npm install
-```
-
-Run a development server with:
-
-```bash
 npm start
 ```
 
+**Docker**
+
+Use `make` to build a Docker image and run start a container running the web server:
+
+```bash
+make up [--dry-run]
+```
+
+Navigate to [localhost:3000](http://localhost:3000) to see an instance of the website running locally.
+
 ## Build & Deploy
 
-You will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project. [Terraform](https://terraform.io) is used in Docker to manage infrastructure.
+You will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project.
+
+[Terraform](https://terraform.io) is used in Docker to manage infrastructure.
 
 Build the Lambda package with:
 
 ```bash
-make
+make [--dry-run]
 ```
 
 Generate a terraform plan with:
 
 ```bash
-make plan
+make plan [--dry-run]
 ```
 
 Update infrastructure with:
 
 ```bash
-make apply
+make apply [--dry-run]
 ```
 
 Clean up any generated artifacts with:
 
 ```bash
-make clean
+make clean [--dry-run]
+```
+
+See all tasks that can be run using tab-completion on `make`:
+
+```bash
+make <tab>
 ```
 
 ## Infrastructure
