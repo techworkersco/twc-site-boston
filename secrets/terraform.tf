@@ -7,10 +7,6 @@ terraform {
   }
 
   required_version = ">= 0.12.0"
-
-  required_providers {
-    aws = "~> 2.7"
-  }
 }
 
 provider aws {
@@ -19,14 +15,20 @@ provider aws {
 }
 
 locals {
+  app  = "website"
+  repo = "https://github.com/techworkersco/twc-site-boston"
+
+  google_api_key     = var.google_api_key
+  google_calendar_id = var.google_calendar_id
+
   secret = {
-    GOOGLE_API_KEY     = var.google_api_key
-    GOOGLE_CALENDAR_ID = var.google_calendar_id
+    GOOGLE_API_KEY     = local.google_api_key
+    GOOGLE_CALENDAR_ID = local.google_calendar_id
   }
 
   tags = {
-    App     = "boston.techworkerscoalition.org"
-    Repo    = var.repo
+    App     = local.app
+    Repo    = local.repo
     Release = var.release
   }
 }
@@ -36,8 +38,8 @@ data aws_kms_key key {
 }
 
 resource aws_secretsmanager_secret secret {
-  description = var.secret_description
-  name        = var.secret_name
+  description = "${local.app} secrets"
+  name        = local.app
   kms_key_id  = data.aws_kms_key.key.id
   tags        = local.tags
 }
@@ -60,36 +62,16 @@ variable google_calendar_id {
   description = "Google Calendar ID."
 }
 
-variable host {
-  description = "Host name."
-  default     = "https://boston.techworkerscoalition.org/"
-}
-
 variable release {
   description = "Release tag."
 }
 
-variable repo {
-  description = "Project repository."
-  default     = "https://github.com/techworkersco/twc-site-boston"
-}
-
-variable secret_description {
-  description = "SecretsManager secret description."
-  default     = "boston.techworkerscoalition.org secrets"
-}
-
-variable secret_name {
-  description = "SecretsManager secret name."
-  default     = "website"
-}
-
 output secret_arn {
   description = "SecretsManager secret ARN."
-  value       = "${aws_secretsmanager_secret.secret.arn}"
+  value       = aws_secretsmanager_secret.secret.arn
 }
 
 output secret_name {
   description = "SecretsManager secret name."
-  value       = "${aws_secretsmanager_secret.secret.name}"
+  value       = aws_secretsmanager_secret.secret.name
 }
