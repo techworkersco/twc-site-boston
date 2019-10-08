@@ -1,13 +1,13 @@
 name      := boston
 runtime   := nodejs10.x
-terraform := 0.12.9
+terraform := latest
 stages    := build plan
 build     := $(shell git describe --tags --always)
 shells    := $(foreach stage,$(stages),shell@$(stage))
 
 .PHONY: all apply clean up $(stages) $(shells)
 
-all: package-lock.json package.zip
+all: node_modules package-lock.json package.zip
 
 .docker:
 	mkdir -p $@
@@ -25,6 +25,9 @@ all: package-lock.json package.zip
 	--tag techworkersco/$(name):$(build)-$* \
 	--target $* .
 
+node_modules:
+	npm install
+
 package-lock.json package.zip: .docker/$(build)@build
 	docker run --rm --entrypoint cat $(shell cat $<) $@ > $@
 
@@ -33,7 +36,7 @@ apply: .docker/$(build)@plan .env
 
 clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
-	-rm -rf .docker *.zip
+	-rm -rf .docker *.zip node_modules
 
 up: .docker/$(build)@build .env
 	docker run --rm -it \

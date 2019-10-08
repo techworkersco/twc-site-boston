@@ -22,10 +22,24 @@ provider null {
 }
 
 locals {
+  app         = var.app
+  domain_name = "boston.techworkerscoalition.org"
+
   tags = {
     App     = var.app
     Repo    = var.repo
     Release = var.release
+  }
+}
+
+data aws_iam_policy_document assume_role {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
   }
 }
 
@@ -41,16 +55,9 @@ data aws_iam_policy_document secret {
   }
 }
 
-module role {
-  source          = "amancevice/lambda-basic-execution-role/aws"
-  version         = "0.0.2"
-  name            = var.app
-  inline_policies = [data.aws_iam_policy_document.secret.json]
-}
-
 resource aws_acm_certificate cert {
-  domain_name               = "boston.techworkerscoalition.org"
-  subject_alternative_names = ["*.boston.techworkerscoalition.org"]
+  domain_name               = local.domain_name
+  subject_alternative_names = ["*.${local.domain_name}"]
   validation_method         = "DNS"
   tags                      = local.tags
 }
@@ -65,7 +72,7 @@ resource aws_api_gateway_deployment api {
 }
 
 resource aws_api_gateway_domain_name custom_domain {
-  domain_name     = "boston.techworkerscoalition.org"
+  domain_name     = local.domain_name
   certificate_arn = aws_acm_certificate.cert.arn
 }
 
@@ -124,13 +131,28 @@ resource aws_cloudwatch_log_group logs {
   tags              = local.tags
 }
 
+resource aws_iam_role role {
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  name               = local.app
+}
+
+resource aws_iam_role_policy inline {
+  policy = data.aws_iam_policy_document.secret.json
+  role   = aws_iam_role.role.id
+}
+
+resource aws_iam_role_policy_attachment basic {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.role.name
+}
+
 resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
   filename         = "${path.module}/package.zip"
   function_name    = "website"
   handler          = "index.handler"
   memory_size      = 2048
-  role             = module.role.role_arn
+  role             = aws_iam_role.role.arn
   runtime          = "nodejs10.x"
   source_code_hash = filebase64sha256("${path.module}/package.zip")
   tags             = local.tags
