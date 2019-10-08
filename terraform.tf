@@ -22,12 +22,13 @@ provider null {
 }
 
 locals {
-  app         = var.app
+  app         = "website"
   domain_name = "boston.techworkerscoalition.org"
+  repo        = "https://github.com/techworkersco/twc-site-boston"
 
   tags = {
-    App     = var.app
-    Repo    = var.repo
+    App     = local.app
+    Repo    = local.repo
     Release = var.release
   }
 }
@@ -44,7 +45,7 @@ data aws_iam_policy_document assume_role {
 }
 
 data aws_secretsmanager_secret secret {
-  name = var.app
+  name = local.app
 }
 
 data aws_iam_policy_document secret {
@@ -222,16 +223,6 @@ output s3_bucket {
   value       = aws_s3_bucket.bucket.bucket
 }
 
-variable app {
-  description = "App name."
-  default     = "website"
-}
-
 variable release {
   description = "Release tag."
-}
-
-variable repo {
-  description = "Project repository."
-  default     = "https://github.com/techworkersco/twc-site-boston"
 }
