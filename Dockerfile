@@ -10,6 +10,7 @@ RUN npm install
 
 # Plan terraform
 FROM hashicorp/terraform:${TERRAFORM} AS plan
+RUN apk add --no-cache python3 && pip3 install awscli
 WORKDIR /var/task/
 COPY --from=build /var/task/ .
 ARG AWS_ACCESS_KEY_ID
