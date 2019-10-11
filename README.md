@@ -29,7 +29,9 @@ Navigate to [localhost:3000](http://localhost:3000) to see an instance of the we
 
 ## Build & Deploy
 
-You will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project.
+This repo is configured to auto-deploy on tagged commits via [Travis](https://travis-ci.com/techworkersco/twc-site-boston). Simply commit your changes, tag the repo and push to GitHub and Travis should do the rest!
+
+To deploy manually you will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project.
 
 [Terraform](https://terraform.io) is used in Docker to manage infrastructure.
 
