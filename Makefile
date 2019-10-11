@@ -31,8 +31,12 @@ node_modules:
 package-lock.json package.zip: .docker/$(build)@build
 	docker run --rm --entrypoint cat $(shell cat $<) $@ > $@
 
-apply: .docker/$(build)@plan .env
-	docker run --rm --env-file .env $(shell cat $<)
+apply: .docker/$(build)@plan
+	docker run --rm \
+	--env AWS_ACCESS_KEY_ID \
+	--env AWS_DEFAULT_REGION \
+	--env AWS_SECRET_ACCESS_KEY \
+	$(shell cat $<)
 
 clean:
 	-docker image rm -f $(shell awk {print} .docker/*)
