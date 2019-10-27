@@ -1,4 +1,3 @@
-name      := boston
 runtime   := nodejs10.x
 terraform := latest
 stages    := build plan
@@ -22,7 +21,7 @@ all: node_modules package-lock.json package.zip
 	--build-arg TERRAFORM=$(terraform) \
 	--build-arg TF_VAR_release=$(build) \
 	--iidfile $@ \
-	--tag techworkersco/$(name):$(build)-$* \
+	--tag techworkersco/twc-site-boston:$(build)-$* \
 	--target $* .
 
 node_modules:
