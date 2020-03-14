@@ -6,7 +6,7 @@ terraform {
     profile = "twc"
   }
 
-  required_version = ">= 0.12.0"
+  required_version = "~> 0.12"
 
   required_providers {
     aws = "~> 2.7"
@@ -17,10 +17,6 @@ provider aws {
   version = "~> 2.7"
 }
 
-provider null {
-  version = "~> 2.1"
-}
-
 locals {
   app         = "website"
   domain_name = "boston.techworkerscoalition.org"
@@ -29,7 +25,7 @@ locals {
   tags = {
     App     = local.app
     Repo    = local.repo
-    Release = var.release
+    Release = var.RELEASE
   }
 }
 
@@ -65,8 +61,8 @@ resource aws_acm_certificate cert {
 
 resource aws_api_gateway_deployment api {
   depends_on = [
-    "aws_api_gateway_integration.root_get",
-    "aws_api_gateway_integration.proxy_get",
+    aws_api_gateway_integration.root_get,
+    aws_api_gateway_integration.proxy_get,
   ]
   rest_api_id = aws_api_gateway_rest_api.api.id
   stage_name  = "production"
@@ -154,7 +150,7 @@ resource aws_lambda_function lambda {
   handler          = "index.handler"
   memory_size      = 2048
   role             = aws_iam_role.role.arn
-  runtime          = "nodejs10.x"
+  runtime          = "nodejs12.x"
   source_code_hash = filebase64sha256("${path.module}/package.zip")
   tags             = local.tags
   timeout          = 30
@@ -188,16 +184,6 @@ resource aws_s3_bucket bucket {
   }
 }
 
-resource null_resource assets {
-  triggers = {
-    release = var.release
-  }
-
-  provisioner "local-exec" {
-    command = "aws s3 sync assets s3://${aws_s3_bucket.bucket.bucket}/website/assets/ --acl public-read"
-  }
-}
-
 output cert_arn {
   description = "ACM certificate ARN."
   value       = aws_acm_certificate.cert.arn
@@ -223,6 +209,6 @@ output s3_bucket {
   value       = aws_s3_bucket.bucket.bucket
 }
 
-variable release {
+variable RELEASE {
   description = "Release tag."
 }

@@ -1,57 +1,55 @@
-runtime   := nodejs10.x
-terraform := latest
-stages    := build plan
-build     := $(shell git describe --tags --always)
-shells    := $(foreach stage,$(stages),shell@$(stage))
+REPO      := techworkersco/twc-site-boston
+RUNTIME   := nodejs12.x
+STAGES    := build plan
+TERRAFORM := latest
+BUILD     := $(shell git describe --tags --always)
+SHELLS    := $(foreach STAGE,$(STAGES),shell@$(STAGE))
 
-.PHONY: all apply clean up $(stages) $(shells)
+.PHONY: default apply clean clobber sync up $(STAGES) $(SHELLS)
 
-all: node_modules package-lock.json package.zip
+default: package-lock.json package.zip
 
 .docker:
 	mkdir -p $@
 
-.docker/$(build)@plan: .docker/$(build)@build
-.docker/$(build)@%: | .docker
+.docker/build: package.json
+.docker/plan:  .docker/build
+.docker/%:   | .docker
 	docker build \
 	--build-arg AWS_ACCESS_KEY_ID \
 	--build-arg AWS_DEFAULT_REGION \
 	--build-arg AWS_SECRET_ACCESS_KEY \
-	--build-arg RUNTIME=$(runtime) \
-	--build-arg TERRAFORM=$(terraform) \
-	--build-arg TF_VAR_release=$(build) \
+	--build-arg RUNTIME=$(RUNTIME) \
+	--build-arg TERRAFORM=$(TERRAFORM) \
+	--build-arg TF_VAR_RELEASE=$(BUILD) \
 	--iidfile $@ \
-	--tag techworkersco/twc-site-boston:$(build)-$* \
-	--target $* .
+	--tag $(REPO):$* \
+	--target $* \
+	.
 
-node_modules:
-	npm install
+.env:
+	cp $@.example $@
 
-package-lock.json package.zip: .docker/$(build)@build
-	docker run --rm --entrypoint cat $(shell cat $<) $@ > $@
+package-lock.json package.zip: .docker/build
+	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
 
-apply: .docker/$(build)@plan
-	docker run --rm \
-	--env AWS_ACCESS_KEY_ID \
-	--env AWS_DEFAULT_REGION \
-	--env AWS_SECRET_ACCESS_KEY \
-	$(shell cat $<)
+apply: .docker/plan .env
+	docker run --rm --env-file .env $$(cat $<)
 
 clean:
-	-docker image rm -f $(shell awk {print} .docker/*)
-	-rm -rf .docker *.zip node_modules
+	rm -rf .docker
 
-up: .docker/$(build)@build .env
-	docker run --rm -it \
-	--entrypoint npm \
-	--env-file .env \
-	--publish 3000:3000 \
-	$(shell cat $<) start
+clobber: clean
+	docker image ls --format '{{.Repository}}:{{.Tag}}' $(REPO) | xargs docker image rm --force
 
-$(stages): %: .docker/$(build)@%
+sync: .docker/build .env
+	docker run --rm --entrypoint aws --env-file .env $$(cat $<) \
+	s3 sync assets s3://boston.techworkerscoalition.org/website/assets/ --acl public-read
 
-$(shells): shell@%: .docker/$(build)@% .env
-	docker run --rm -it \
-	--entrypoint /bin/sh \
-	--env-file .env \
-	$(shell cat $<)
+up: .docker/build .env
+	docker run --rm -it --entrypoint npm --env-file .env --publish 3000:3000 $$(cat $<) start
+
+$(STAGES): %: .docker/%
+
+$(SHELLS): shell@%: .docker/% .env
+	docker run --rm -it --entrypoint /bin/sh --env-file .env $$(cat $<)
