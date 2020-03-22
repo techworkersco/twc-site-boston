@@ -36,7 +36,11 @@ package-lock.json package.zip: .docker/zip
 	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
 
 apply: .docker/plan .env
-	docker run --rm --env-file .env $$(cat $<)
+	docker run --rm \
+	--env AWS_ACCESS_KEY_ID \
+	--env AWS_DEFAULT_REGION \
+	--env AWS_SECRET_ACCESS_KEY \
+	$$(cat $<)
 
 clean:
 	rm -rf .docker
@@ -46,7 +50,13 @@ clobber: clean
 	rm package.zip
 
 sync: .docker/lock .env
-	docker run --rm --entrypoint aws --env-file .env $$(cat $<) \
+	docker run --rm \
+	--entrypoint aws \
+	--env AWS_ACCESS_KEY_ID \
+	--env AWS_DEFAULT_REGION \
+	--env AWS_SECRET_ACCESS_KEY \
+	--volume assets:/var/task/assets \
+	$$(cat $<) \
 	s3 sync assets s3://boston.techworkerscoalition.org/website/assets/ --acl public-read
 
 up: .docker/dev .env
