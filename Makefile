@@ -1,6 +1,6 @@
 REPO      := techworkersco/twc-site-boston
 RUNTIME   := nodejs12.x
-STAGES    := build plan
+STAGES    := lock dev zip plan
 TERRAFORM := latest
 BUILD     := $(shell git describe --tags --always)
 SHELLS    := $(foreach STAGE,$(STAGES),shell@$(STAGE))
@@ -12,16 +12,18 @@ default: package-lock.json package.zip
 .docker:
 	mkdir -p $@
 
-.docker/build: package.json
-.docker/plan:  .docker/build
-.docker/%:   | .docker
+.docker/lock: package.json
+.docker/dev: .docker/lock
+.docker/zip: .docker/dev
+.docker/plan: .docker/zip
+.docker/%: | .docker
 	docker build \
 	--build-arg AWS_ACCESS_KEY_ID \
 	--build-arg AWS_DEFAULT_REGION \
 	--build-arg AWS_SECRET_ACCESS_KEY \
 	--build-arg RUNTIME=$(RUNTIME) \
 	--build-arg TERRAFORM=$(TERRAFORM) \
-	--build-arg TF_VAR_RELEASE=$(BUILD) \
+	--build-arg TF_VAR_BUILD=$(BUILD) \
 	--iidfile $@ \
 	--tag $(REPO):$* \
 	--target $* \
@@ -30,7 +32,7 @@ default: package-lock.json package.zip
 .env:
 	cp $@.example $@
 
-package-lock.json package.zip: .docker/build
+package-lock.json package.zip: .docker/zip
 	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
 
 apply: .docker/plan .env
@@ -41,12 +43,13 @@ clean:
 
 clobber: clean
 	docker image ls --format '{{.Repository}}:{{.Tag}}' $(REPO) | xargs docker image rm --force
+	rm package.zip
 
-sync: .docker/build .env
+sync: .docker/lock .env
 	docker run --rm --entrypoint aws --env-file .env $$(cat $<) \
 	s3 sync assets s3://boston.techworkerscoalition.org/website/assets/ --acl public-read
 
-up: .docker/build .env
+up: .docker/dev .env
 	docker run --rm -it --entrypoint npm --env-file .env --publish 3000:3000 $$(cat $<) start
 
 $(STAGES): %: .docker/%

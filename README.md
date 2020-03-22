@@ -59,12 +59,6 @@ Clean up any generated artifacts with:
 make clean [--dry-run]
 ```
 
-See all tasks that can be run using tab-completion on `make`:
-
-```bash
-make <tab>
-```
-
 ## Infrastructure
 
 The project manages the following AWS components:
