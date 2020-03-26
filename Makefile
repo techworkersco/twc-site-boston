@@ -32,7 +32,10 @@ default: package-lock.json package.zip
 .env:
 	cp $@.example $@
 
-package-lock.json package.zip: .docker/zip
+package-lock.json: .docker/lock
+	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
+
+package.zip: .docker/zip
 	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
 
 apply: .docker/plan .env
