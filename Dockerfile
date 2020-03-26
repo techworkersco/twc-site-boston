@@ -3,17 +3,18 @@ ARG TERRAFORM=latest
 
 # Lock NodeJS dependencies
 FROM lambci/lambda:build-${RUNTIME} AS lock
-COPY index.js package*.json /var/task/
+COPY package*.json /var/task/
 RUN npm install --production
 
 # Dev environment
 FROM lambci/lambda:build-${RUNTIME} AS dev
+COPY . .
 COPY --from=lock /var/task/ .
 RUN npm install
 
 # Zip Lambda package
 FROM lambci/lambda:build-${RUNTIME} AS zip
-COPY --from=lock /var/task/ .
+COPY --from=dev /var/task/ .
 RUN zip -r /var/task/package.zip node_modules website index.js package*.json
 
 # Plan terraform

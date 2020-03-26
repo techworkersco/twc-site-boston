@@ -12,7 +12,7 @@ default: package-lock.json package.zip
 .docker:
 	mkdir -p $@
 
-.docker/lock: package.json
+.docker/lock: Dockerfile package.json
 .docker/dev: .docker/lock
 .docker/zip: .docker/dev
 .docker/plan: .docker/zip
