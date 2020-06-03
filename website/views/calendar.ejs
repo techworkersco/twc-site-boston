@@ -3,57 +3,56 @@
   <%- include head.ejs %>
 
   <body>
-    <div class="main-wrapper">
+    <%- include header.ejs %>
 
-      <%- include header.ejs %>
+    <main class="contain">
 
-      <main class="container">
+      <h1 class="lh-tight marg-b-3">
+        <span class="red">Subscribe</span> to our Calendar
+      </h1>
 
-        <h1>Subscribe to TWC Calendar</h1>
+      <div class="container">
 
-        <div class="container">
-
-          <div class="row">
-            <p>This page will help you decide how you want to subscribe to this Google Calendar.</p>
-            <p>Share the URL to help others subscribe.</p>
-          </div>
-
-          <br/>
-
-          <div class="row columns">
-            <div class="column is-1">
-              <p>
-                If you already use <a target="_blank" href="https://calendar.google.com/">Google Calendar</a>
-                to manage your events from the web or on your mobile device,
-                this option will add a calendar to your existing calendars in
-                Google.
-              </p>
-              <p>
-                Unfortunately the subscription link will only work from a
-                laptop or desktop computer. If you are on your phone or tablet,
-                bookmark this page and re-visit from a personal computer.
-              </p>
-              <a class="button" href="/calendar/google">Google Calendar</a>
-            </div>
-
-            <div class="column is-1">
-              <p>
-                If you don't have a Google account, or don't wish to use Google
-                Calendar, you may opt to subscribe with <a target="_blank" href="https://en.wikipedia.org/wiki/ICalendar">iCalendar</a>.
-                iCalendar is an open standard file format supported by many
-                calendar apps &mdash; in particular iPhones &amp; iPads.
-              </p>
-              <p>
-                iCalendar links will work from any device including handheld,
-                laptop &amp; desktop computers.
-              </p>
-              <a class="button" href="/calendar/webcal">iCalendar</a>
-            </div>
-          </div>
-
+        <div class="row">
+          <p>This page will help you decide how you want to subscribe to this Google Calendar.</p>
+          <p><a href="">Share the URL</a> to help others subscribe.</p>
         </div>
-      </main>
-    </div>
+
+        <br/>
+
+        <div class="row columns">
+          <div class="column is-1">
+            <p>
+              If you already use <a target="_blank" href="https://calendar.google.com/">Google Calendar</a>
+              to manage your events from the web or on your mobile device,
+              this option will add a calendar to your existing calendars in
+              Google.
+            </p>
+            <p>
+              Unfortunately the subscription link will only work from a
+              laptop or desktop computer. If you are on your phone or tablet,
+              bookmark this page and re-visit from a personal computer.
+            </p>
+            <a class="button" href="/calendar/google">Google Calendar</a>
+          </div>
+
+          <div class="column is-1">
+            <p>
+              If you don't have a Google account, or don't wish to use Google
+              Calendar, you may opt to subscribe with <a target="_blank" href="https://en.wikipedia.org/wiki/ICalendar">iCalendar</a>.
+              iCalendar is an open standard file format supported by many
+              calendar apps &mdash; in particular iPhones &amp; iPads.
+            </p>
+            <p>
+              iCalendar links will work from any device including handheld,
+              laptop &amp; desktop computers.
+            </p>
+            <a class="button" href="/calendar/webcal">iCalendar</a>
+          </div>
+        </div>
+
+      </div>
+    </main>
 
     <%- include footer.ejs %>
 

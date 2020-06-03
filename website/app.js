@@ -37,9 +37,12 @@ app.get('/', (req, res) => {
   });
 });
 
+/*
+// TODO figure out a better way to serve our own assets
 app.get('/assets/*', (req, res) => {
   res.redirect(`http://${S3_BUCKET}.s3.amazonaws.com/website${req.path}`);
 });
+*/
 
 app.get('/events', (req, res) => {
   res.redirect('/calendar');
@@ -61,6 +64,8 @@ app.get('/calendar/webcal', (req, res) => {
   res.redirect(getWebcalUrl(GOOGLE_CALENDAR_ID));
 });
 
-app.get('*', (req, res) => res.redirect('/'));
+app.get('*', (req, res) => {
+  res.redirect(`https://www.techworkerscoalition.org${req.originalUrl}`);
+});
 
 module.exports = app;

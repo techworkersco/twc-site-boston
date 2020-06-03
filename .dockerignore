@@ -1,6 +1,0 @@
-*
-!assets/
-!website/
-!index.js
-!package*.json
-!terraform.tf

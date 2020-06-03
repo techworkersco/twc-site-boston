@@ -3,21 +3,19 @@
   <%- include head.ejs %>
 
   <body>
-    <div class="main-wrapper">
+    <%- include header.ejs %>
 
-      <%- include header.ejs %>
+    <main class="contain">
+      <h1 class="lh-tight marg-b-3">
+        <span class="red">No</span> Phone Zone
+      </h1>
 
-      <main class="container">
-        <h1>No Phone Zone</h1>
-
-        <p>
-          Unfortunately the subscription link for Google Calendar will only
-          work from a laptop or desktop computer. If you are on your phone or
-          tablet, bookmark this page and re-visit from a personal computer.
-        </p>
-      </main>
-
-    </div>
+      <p>
+        Unfortunately the subscription link for Google Calendar will only
+        work from a laptop or desktop computer. If you are on your phone or
+        tablet, bookmark this page and re-visit from a personal computer.
+      </p>
+    </main>
 
     <%- include footer.ejs %>
 
