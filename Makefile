@@ -20,14 +20,14 @@ terraform.zip: package.zip | .terraform
 
 .PHONY: apply clean clobber plan sync up
 
-apply: plan
-	terraform $@
+apply: terraform.zip
+	terraform apply $<
 
 clean:
 	rm -rf *.zip
 
 clobber: clean
-	rm -rf node_modules
+	rm -rf node_modules .terraform
 
 plan: terraform.zip
 

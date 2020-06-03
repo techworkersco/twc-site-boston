@@ -1,9 +1,8 @@
 terraform {
   backend s3 {
-    bucket  = "boston.techworkerscoalition.org"
-    key     = "terraform/website.tfstate"
-    region  = "us-east-1"
-    profile = "twc"
+    bucket = "boston.techworkerscoalition.org"
+    key    = "terraform/website.tfstate"
+    region = "us-east-1"
   }
 
   required_version = "~> 0.12"
@@ -15,6 +14,7 @@ terraform {
 
 provider aws {
   version = "~> 2.7"
+  region  = "us-east-1"
 }
 
 locals {
