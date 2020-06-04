@@ -23,9 +23,8 @@ locals {
   repo        = "https://github.com/techworkersco/twc-site-boston"
 
   tags = {
-    App   = local.app
-    Repo  = local.repo
-    Build = var.BUILD
+    App  = local.app
+    Repo = local.repo
   }
 }
 
@@ -207,8 +206,4 @@ output lambda_function_name {
 output s3_bucket {
   description = "S3 bucket"
   value       = aws_s3_bucket.bucket.bucket
-}
-
-variable BUILD {
-  description = "Build name"
 }
