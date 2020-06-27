@@ -1,8 +1,3 @@
-REPO      := techworkersco/twc-site-boston
-RUNTIME   := nodejs12.x
-TERRAFORM := latest
-BUILD     := $(shell git describe --tags --always)
-
 package.zip: | node_modules
 	zip -r $@ node_modules website index.js package*.json
 
