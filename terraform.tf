@@ -28,34 +28,23 @@ locals {
   }
 }
 
-data aws_iam_policy_document assume_role {
-  statement {
-    actions = ["sts:AssumeRole"]
+# SECRETS
 
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
+resource aws_secretsmanager_secret secret {
+  description = "${local.app} secrets"
+  name        = local.app
+  tags        = local.tags
+}
+
+# API GATEWAY :: REST API
+
+resource aws_api_gateway_rest_api api {
+  description = "Boston TWC website"
+  name        = "website"
+
+  endpoint_configuration {
+    types = ["EDGE"]
   }
-}
-
-data aws_secretsmanager_secret secret {
-  name = local.app
-}
-
-data aws_iam_policy_document secret {
-  statement {
-    sid       = "GetSecretValue"
-    actions   = ["secretsmanager:GetSecretValue"]
-    resources = [data.aws_secretsmanager_secret.secret.arn]
-  }
-}
-
-resource aws_acm_certificate cert {
-  domain_name               = local.domain_name
-  subject_alternative_names = ["*.${local.domain_name}"]
-  validation_method         = "DNS"
-  tags                      = local.tags
 }
 
 resource aws_api_gateway_deployment api {
@@ -67,10 +56,45 @@ resource aws_api_gateway_deployment api {
   stage_name  = "production"
 }
 
+# API GATEWAY :: DOMAIN
+
+resource aws_acm_certificate cert {
+  domain_name               = local.domain_name
+  subject_alternative_names = ["*.${local.domain_name}"]
+  validation_method         = "DNS"
+  tags                      = local.tags
+}
+
 resource aws_api_gateway_domain_name custom_domain {
   domain_name     = local.domain_name
   certificate_arn = aws_acm_certificate.cert.arn
 }
+
+# API GATEWAY :: RESOURCES
+
+resource aws_api_gateway_resource proxy {
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "{proxy+}"
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+# API GATEWAY :: METHODS
+
+resource aws_api_gateway_method proxy_get {
+  authorization = "NONE"
+  http_method   = "GET"
+  resource_id   = aws_api_gateway_resource.proxy.id
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+}
+
+resource aws_api_gateway_method root_get {
+  authorization = "NONE"
+  http_method   = "GET"
+  resource_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+}
+
+# API GATEWAY :: INTEGRATIONS
 
 resource aws_api_gateway_integration proxy_get {
   content_handling        = "CONVERT_TO_TEXT"
@@ -92,39 +116,33 @@ resource aws_api_gateway_integration root_get {
   uri                     = aws_lambda_function.lambda.invoke_arn
 }
 
-resource aws_api_gateway_method proxy_get {
-  authorization = "NONE"
-  http_method   = "GET"
-  resource_id   = aws_api_gateway_resource.proxy.id
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-}
-
-resource aws_api_gateway_method root_get {
-  authorization = "NONE"
-  http_method   = "GET"
-  resource_id   = aws_api_gateway_rest_api.api.root_resource_id
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-}
-
-resource aws_api_gateway_resource proxy {
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "{proxy+}"
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
-resource aws_api_gateway_rest_api api {
-  description = "Boston TWC website"
-  name        = "website"
-
-  endpoint_configuration {
-    types = ["EDGE"]
-  }
-}
+# LOGS
 
 resource aws_cloudwatch_log_group logs {
   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   retention_in_days = 30
   tags              = local.tags
+}
+
+# IAM
+
+data aws_iam_policy_document assume_role {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+data aws_iam_policy_document secret {
+  statement {
+    sid       = "GetSecretValue"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [aws_secretsmanager_secret.secret.arn]
+  }
 }
 
 resource aws_iam_role role {
@@ -142,6 +160,8 @@ resource aws_iam_role_policy_attachment basic {
   role       = aws_iam_role.role.name
 }
 
+# LAMBDA
+
 resource aws_lambda_function lambda {
   description      = "Boston TWC Website"
   filename         = "${path.module}/package.zip"
@@ -156,7 +176,7 @@ resource aws_lambda_function lambda {
 
   environment {
     variables = {
-      AWS_SECRET = data.aws_secretsmanager_secret.secret.name
+      AWS_SECRET = aws_secretsmanager_secret.secret.name
       S3_BUCKET  = aws_s3_bucket.bucket.bucket
     }
   }
@@ -168,6 +188,8 @@ resource aws_lambda_permission invoke {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
 }
+
+# S3
 
 resource aws_s3_bucket bucket {
   acl    = "private"
@@ -182,6 +204,8 @@ resource aws_s3_bucket bucket {
     }
   }
 }
+
+# OUTPUTS
 
 output url {
   value = "https://boston.techworkerscoalition.org/"
