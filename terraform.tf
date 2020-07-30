@@ -28,35 +28,7 @@ locals {
   }
 }
 
-# SECRETS
-
-resource aws_secretsmanager_secret secret {
-  description = "${local.app} secrets"
-  name        = local.app
-  tags        = local.tags
-}
-
-# API GATEWAY :: REST API
-
-resource aws_api_gateway_rest_api api {
-  description = "Boston TWC website"
-  name        = "website"
-
-  endpoint_configuration {
-    types = ["EDGE"]
-  }
-}
-
-resource aws_api_gateway_deployment api {
-  depends_on = [
-    aws_api_gateway_integration.root_get,
-    aws_api_gateway_integration.proxy_get,
-  ]
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  stage_name  = "production"
-}
-
-# API GATEWAY :: DOMAIN
+# DNS
 
 resource aws_acm_certificate cert {
   domain_name               = local.domain_name
@@ -65,55 +37,113 @@ resource aws_acm_certificate cert {
   tags                      = local.tags
 }
 
-resource aws_api_gateway_domain_name custom_domain {
-  domain_name     = local.domain_name
-  certificate_arn = aws_acm_certificate.cert.arn
+resource aws_route53_zone zone {
+  name = local.domain_name
 }
 
-# API GATEWAY :: RESOURCES
+resource aws_route53_record a {
+  name    = aws_apigatewayv2_domain_name.domain.domain_name
+  type    = "A"
+  zone_id = aws_route53_zone.zone.id
 
-resource aws_api_gateway_resource proxy {
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "{proxy+}"
-  rest_api_id = aws_api_gateway_rest_api.api.id
+  alias {
+    evaluate_target_health = true
+    name                   = aws_apigatewayv2_domain_name.domain.domain_name_configuration.0.target_domain_name
+    zone_id                = aws_apigatewayv2_domain_name.domain.domain_name_configuration.0.hosted_zone_id
+  }
 }
 
-# API GATEWAY :: METHODS
+# API GATEWAY :: DOMAIN
 
-resource aws_api_gateway_method proxy_get {
-  authorization = "NONE"
-  http_method   = "GET"
-  resource_id   = aws_api_gateway_resource.proxy.id
-  rest_api_id   = aws_api_gateway_rest_api.api.id
+resource aws_apigatewayv2_domain_name domain {
+  domain_name = local.domain_name
+  tags        = local.tags
+
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate.cert.arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
 }
 
-resource aws_api_gateway_method root_get {
-  authorization = "NONE"
-  http_method   = "GET"
-  resource_id   = aws_api_gateway_rest_api.api.root_resource_id
-  rest_api_id   = aws_api_gateway_rest_api.api.id
+resource aws_apigatewayv2_api_mapping domain {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  domain_name = aws_apigatewayv2_domain_name.domain.id
+  stage       = aws_apigatewayv2_stage.default.id
 }
 
-# API GATEWAY :: INTEGRATIONS
+# API GATEWAY :: HTTP API
 
-resource aws_api_gateway_integration proxy_get {
-  content_handling        = "CONVERT_TO_TEXT"
-  http_method             = aws_api_gateway_method.proxy_get.http_method
-  integration_http_method = "POST"
-  resource_id             = aws_api_gateway_resource.proxy.id
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.lambda.invoke_arn
+resource aws_apigatewayv2_api http_api {
+  description   = "Boston TWC website"
+  name          = "website"
+  protocol_type = "HTTP"
+  tags          = local.tags
 }
 
-resource aws_api_gateway_integration root_get {
-  content_handling        = "CONVERT_TO_TEXT"
-  http_method             = aws_api_gateway_method.root_get.http_method
-  integration_http_method = "POST"
-  resource_id             = aws_api_gateway_rest_api.api.root_resource_id
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.lambda.invoke_arn
+resource aws_apigatewayv2_stage default {
+  api_id      = aws_apigatewayv2_api.http_api.id
+  auto_deploy = true
+  name        = "$default"
+  tags        = local.tags
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_logs.arn
+
+    format = jsonencode({
+      httpMethod     = "$context.httpMethod"
+      ip             = "$context.identity.sourceIp"
+      protocol       = "$context.protocol"
+      requestId      = "$context.requestId"
+      requestTime    = "$context.requestTime"
+      responseLength = "$context.responseLength"
+      routeKey       = "$context.routeKey"
+      status         = "$context.status"
+    })
+  }
+
+  lifecycle {
+    ignore_changes = [deployment_id]
+  }
+}
+
+resource aws_cloudwatch_log_group api_logs {
+  name              = "/aws/apigatewayv2/${aws_apigatewayv2_api.http_api.name}"
+  retention_in_days = 30
+  tags              = local.tags
+}
+
+# API GATEWAY :: HTTP INTEGRATIONS
+
+resource aws_apigatewayv2_integration proxy {
+  api_id               = aws_apigatewayv2_api.http_api.id
+  connection_type      = "INTERNET"
+  description          = "Lambda example"
+  integration_method   = "POST"
+  integration_type     = "AWS_PROXY"
+  integration_uri      = aws_lambda_function.lambda.invoke_arn
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 3000
+
+  lifecycle {
+    ignore_changes = [passthrough_behavior]
+  }
+}
+
+# API GATEWAY :: HTTP ROUTES
+
+resource aws_apigatewayv2_route get_root {
+  api_id             = aws_apigatewayv2_api.http_api.id
+  route_key          = "GET /"
+  authorization_type = "NONE"
+  target             = "integrations/${aws_apigatewayv2_integration.proxy.id}"
+}
+
+resource aws_apigatewayv2_route get_proxy {
+  api_id             = aws_apigatewayv2_api.http_api.id
+  route_key          = "GET /{proxy+}"
+  authorization_type = "NONE"
+  target             = "integrations/${aws_apigatewayv2_integration.proxy.id}"
 }
 
 # LOGS
@@ -186,14 +216,14 @@ resource aws_lambda_permission invoke {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/*"
 }
 
 # S3
 
 resource aws_s3_bucket bucket {
   acl    = "private"
-  bucket = aws_api_gateway_domain_name.custom_domain.domain_name
+  bucket = local.domain_name
   tags   = local.tags
 
   server_side_encryption_configuration {
@@ -203,6 +233,19 @@ resource aws_s3_bucket bucket {
       }
     }
   }
+}
+
+# SECRETS
+
+data aws_kms_key kms_key {
+  key_id = "alias/aws/secretsmanager"
+}
+
+resource aws_secretsmanager_secret secret {
+  description = "${local.app} secrets"
+  name        = local.app
+  kms_key_id  = data.aws_kms_key.kms_key.id
+  tags        = local.tags
 }
 
 # OUTPUTS
