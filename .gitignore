@@ -11,4 +11,5 @@
 **/.terraform/
 **/node_modules/
 *.env
+*.iid
 *.zip

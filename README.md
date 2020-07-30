@@ -4,11 +4,19 @@ Local Boston subdomain website.
 
 ## Quickstart
 
-First, copy `.env.example` to `.env` and fill in the appropriate values.
+First, run `make .env` and fill the appropriate values into the file.
 
 Then run a local web server natively or with Docker.
 
-**Native**
+### Docker (recommended)
+
+Use `make` to build a Docker image and run start a container running the web server:
+
+```bash
+make up [--dry-run]
+```
+
+### NodeJS
 
 Install node modules and start server:
 
@@ -17,23 +25,13 @@ npm install
 npm start
 ```
 
-**Docker**
-
-Use `make` to build a Docker image and run start a container running the web server:
-
-```bash
-make up [--dry-run]
-```
-
 Navigate to [localhost:3000](http://localhost:3000) to see an instance of the website running locally.
 
 ## Build & Deploy
 
-This repo is configured to auto-deploy on tagged commits via [Travis](https://travis-ci.com/techworkersco/twc-site-boston). Simply commit your changes, tag the repo and push to GitHub and Travis should do the rest!
+This repo is configured to auto-deploy on tagged commits via [GitHub Actions](https://github.com/techworkersco/twc-site-boston/actions). Simply commit your changes, **tag** the repo and push to GitHub and Travis should do the rest!
 
-To deploy manually you will need [GNU Make](https://www.gnu.org/software/make/) and [Docker](https://docs.docker.com/install/) installed in order to build and deploy this project.
-
-[Terraform](https://terraform.io) is used in Docker to manage infrastructure.
+[Terraform](https://terraform.io) is used to manage infrastructure.
 
 Build the Lambda package with:
 

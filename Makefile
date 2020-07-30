@@ -1,10 +1,15 @@
-package.zip: | node_modules
-	zip -r $@ node_modules website index.js package*.json
+RUNTIME := nodejs12.x
+REPO    := techworkerscoalition/twc-site-boston
 
-node_modules: package.json
-	npm install
+.PHONY: plan apply sync up clean
 
-terraform.zip: package.zip | .terraform
+package.zip: package.iid
+	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
+
+package.iid: website/* Dockerfile index.js package*.json
+	docker build --build-arg RUNTIME=$(RUNTIME) --iidfile $@ --tag $(REPO) .
+
+.terraform/terraform.zip: package.zip | .terraform
 	terraform plan -out $@
 
 .env:
@@ -13,21 +18,16 @@ terraform.zip: package.zip | .terraform
 .terraform:
 	terraform init
 
-.PHONY: apply clean clobber plan sync up
-
-apply: terraform.zip
+apply: .terraform/terraform.zip
 	terraform apply $<
 
 clean:
-	rm -rf *.zip
+	rm -rf .terraform package.iid package.zip
 
-clobber: clean
-	rm -rf node_modules .terraform
-
-plan: terraform.zip
+plan: .terraform/terraform.zip
 
 sync:
 	aws s3 sync assets s3://boston.techworkerscoalition.org/website/assets/ --acl public-read
 
-up:
-	npm start
+up: package.iid .env
+	docker run --rm --env-file .env --publish 3000:3000 $$(cat $<)
