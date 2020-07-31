@@ -10,9 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: hashicorp/setup-terraform@v1
-      - uses: amancevice/aws-sts-assume-role@v0
+      - uses: aws-actions/configure-aws-credentials@v1
         with:
-          access_key_id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role_arn:          ${{ secrets.AWS_ROLE_ARN }}
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume:        ${{ secrets.AWS_ROLE_ARN }}
       - run: make plan
