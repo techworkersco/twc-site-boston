@@ -177,10 +177,12 @@ data aws_iam_policy_document secret {
 
 resource aws_iam_role role {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  name               = local.app
+  name               = "${local.app}-lambda"
+  tags               = local.tags
 }
 
 resource aws_iam_role_policy inline {
+  name   = "secrets-access"
   policy = data.aws_iam_policy_document.secret.json
   role   = aws_iam_role.role.id
 }
