@@ -5,15 +5,11 @@ terraform {
     region = "us-east-1"
   }
 
-  required_version = "~> 0.12"
-
-  required_providers {
-    aws = "~> 2.7"
-  }
+  required_version = "~> 0.13"
 }
 
 provider aws {
-  version = "~> 2.7"
+  version = "~> 3.1"
   region  = "us-east-1"
 }
 
