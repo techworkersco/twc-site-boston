@@ -3,10 +3,13 @@ REPO    := techworkerscoalition/twc-site-boston
 
 .PHONY: plan apply sync up clean
 
-package.zip: package.iid
-	docker run --rm --entrypoint cat $$(cat $<) $@ > $@
+package.zip: package-lock.json | package.iid
+	docker run --rm --entrypoint cat $$(cat $|) $@ > $@
 
-package.iid: website/* Dockerfile index.js package*.json
+package-lock.json: | package.iid
+	docker run --rm --entrypoint cat $$(cat $|) $@ > $@
+
+package.iid: website/* Dockerfile index.js package.json
 	docker build --build-arg RUNTIME=$(RUNTIME) --iidfile $@ --tag $(REPO) .
 
 .terraform/terraform.zip: package.zip | .terraform
