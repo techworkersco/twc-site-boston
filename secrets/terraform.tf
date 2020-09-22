@@ -1,8 +1,8 @@
-terraform { required_version = "~> 0.12" }
+terraform { required_version = "~> 0.13" }
 
 provider aws {
   region  = "us-east-1"
-  version = "~> 2.70"
+  version = "~> 3.7"
 }
 
 variable GOOGLE_API_KEY { description = "Google API key" }
