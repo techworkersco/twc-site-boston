@@ -7,7 +7,7 @@
     "googleapis": "^59.0.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.757.0",
+    "aws-sdk": "^2.814.0",
     "dotenv": "^8.0.0"
   },
   "name": "boston.techworkerscoalition.org",
