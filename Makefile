@@ -1,5 +1,5 @@
-RUNTIME := nodejs12.x
-REPO    := techworkerscoalition/twc-site-boston
+NODE_VERSION := 14
+REPO         := techworkerscoalition/twc-site-boston
 
 .PHONY: plan apply sync up clean
 
@@ -10,7 +10,7 @@ package-lock.json: | package.iid
 	docker run --rm --entrypoint cat $$(cat $|) $@ > $@
 
 package.iid: website/* Dockerfile index.js package.json
-	docker build --build-arg RUNTIME=$(RUNTIME) --iidfile $@ --tag $(REPO) .
+	docker build --build-arg NODE_VERSION=$(NODE_VERSION) --iidfile $@ --tag $(REPO) .
 
 .terraform/terraform.zip: package.zip | .terraform
 	terraform plan -out $@
