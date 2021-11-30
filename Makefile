@@ -3,16 +3,16 @@ REPO         := techworkerscoalition/twc-site-boston
 
 .PHONY: plan apply sync up clean
 
-package.zip: package-lock.json | package.iid
-	docker run --rm --entrypoint cat $$(cat $|) $@ > $@
+package.zip: package-lock.json
+	docker run --rm --entrypoint cat $$(cat package.iid) $@ > $@
 
-package-lock.json: | package.iid
-	docker run --rm --entrypoint cat $$(cat $|) $@ > $@
+package-lock.json: package.iid
+	docker run --rm --entrypoint cat $$(cat package.iid) $@ > $@
 
-package.iid: website/* Dockerfile index.js package.json
+package.iid: website/* website/views/* Dockerfile index.js package.json
 	docker build --build-arg NODE_VERSION=$(NODE_VERSION) --iidfile $@ --tag $(REPO) .
 
-.terraform/terraform.zip: package.zip | .terraform
+.terraform/terraform.zip: package.zip *.tf | .terraform
 	terraform plan -out $@
 
 .env:
