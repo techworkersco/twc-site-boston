@@ -1,16 +1,22 @@
-terraform { required_version = "~> 0.13" }
+terraform {
+  required_version = "~> 1.0"
 
-provider aws {
-  region  = "us-east-1"
-  version = "~> 3.7"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.7"
+    }
+  }
 }
 
-variable GOOGLE_API_KEY { description = "Google API key" }
-variable GOOGLE_CALENDAR_ID { description = "Google Calendar ID" }
+provider "aws" { region = "us-east-1" }
 
-data aws_secretsmanager_secret secret { name = "website" }
+variable "GOOGLE_API_KEY" { description = "Google API key" }
+variable "GOOGLE_CALENDAR_ID" { description = "Google Calendar ID" }
 
-resource aws_secretsmanager_secret_version version {
+data "aws_secretsmanager_secret" "secret" { name = "website" }
+
+resource "aws_secretsmanager_secret_version" "version" {
   secret_id = data.aws_secretsmanager_secret.secret.id
 
   secret_string = jsonencode({
