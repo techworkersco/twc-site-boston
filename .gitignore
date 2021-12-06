@@ -13,3 +13,4 @@
 *.env
 *.iid
 *.zip
+.node-version
