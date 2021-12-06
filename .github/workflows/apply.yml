@@ -2,7 +2,7 @@ name: apply
 on:
   push:
     tags:
-      - '*'
+      - "*"
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -11,9 +11,9 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ secrets.AWS_DEFAULT_REGION }}
-          role-to-assume:        ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-duration-seconds: 900
-      - run: make apply
+      - run: make apply-auto
