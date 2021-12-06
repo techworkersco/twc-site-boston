@@ -1,36 +1,42 @@
-NODE_VERSION := 14
-REPO         := techworkerscoalition/twc-site-boston
+all: .env terraform.tfvars app/node_modules package.zip
 
-.PHONY: plan apply sync up clean
+build: package.zip
 
-package.zip: package-lock.json
-	docker run --rm --entrypoint cat $$(cat package.iid) $@ > $@
+clean:
+	rm -rf app/node_modules build package.zip
 
-package-lock.json: package.iid
-	docker run --rm --entrypoint cat $$(cat package.iid) $@ > $@
+up: .env app/node_modules
+	cd app && npm start
 
-package.iid: website/* website/views/* Dockerfile index.js package.json
-	docker build --build-arg NODE_VERSION=$(NODE_VERSION) --iidfile $@ --tag $(REPO) .
+plan: package.zip | .terraform
+	terraform plan
 
-.terraform/terraform.zip: package.zip *.tf | .terraform
-	terraform plan -out $@
+apply: package.zip | .terraform
+	terraform apply
+
+apply-auto: package.zip | .terraform
+	terraform apply -auto-approve
+
+.PHONY: all build clean up plan apply apply-auto
+
+package.zip: app/*.js app/*.json app/views/*
+	mkdir -p build
+	cp app/package*.json build
+	cp app/app.js build
+	cp app/index.js build
+	cp -r app/views build/views
+	cd build && npm install --production
+	cd build && zip -9r ../$@ *
+
+app/node_modules: app/package.json
+	cd app && npm install
+
+terraform.tfvars:
+	echo 'GOOGLE_API_KEY     = "<fill-me-in>"' >> $@
+	echo 'GOOGLE_CALENDAR_ID = "<fill-me-in>"' >> $@
 
 .env:
 	cp $@.example $@
 
-.terraform:
-	terraform init
-
-apply: .terraform/terraform.zip
-	terraform apply $<
-
-clean:
-	rm -rf .terraform package.iid package.zip
-
-plan: .terraform/terraform.zip
-
-sync:
-	aws s3 sync assets s3://boston.techworkerscoalition.org/website/assets/ --acl public-read
-
-up: package.iid .env
-	docker run --rm --env-file .env --publish 3000:3000 $$(cat $<)
+.terraform: *.tf
+	terraform init && touch .terraform || rm -rf .terraform

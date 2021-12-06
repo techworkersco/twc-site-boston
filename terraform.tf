@@ -1,5 +1,5 @@
 terraform {
-  backend s3 {
+  backend "s3" {
     bucket = "boston.techworkerscoalition.org"
     key    = "terraform/website.tfstate"
     region = "us-east-1"
@@ -15,8 +15,8 @@ terraform {
   }
 }
 
-provider aws {
-  region  = "us-east-1"
+provider "aws" {
+  region = "us-east-1"
 }
 
 locals {
@@ -32,18 +32,18 @@ locals {
 
 # DNS
 
-resource aws_acm_certificate cert {
+resource "aws_acm_certificate" "cert" {
   domain_name               = local.domain_name
   subject_alternative_names = ["*.${local.domain_name}"]
   validation_method         = "DNS"
   tags                      = local.tags
 }
 
-resource aws_route53_zone zone {
+resource "aws_route53_zone" "zone" {
   name = local.domain_name
 }
 
-resource aws_route53_record a {
+resource "aws_route53_record" "a" {
   name    = aws_apigatewayv2_domain_name.domain.domain_name
   type    = "A"
   zone_id = aws_route53_zone.zone.id
@@ -57,7 +57,7 @@ resource aws_route53_record a {
 
 # API GATEWAY :: DOMAIN
 
-resource aws_apigatewayv2_domain_name domain {
+resource "aws_apigatewayv2_domain_name" "domain" {
   domain_name = local.domain_name
   tags        = local.tags
 
@@ -68,7 +68,7 @@ resource aws_apigatewayv2_domain_name domain {
   }
 }
 
-resource aws_apigatewayv2_api_mapping domain {
+resource "aws_apigatewayv2_api_mapping" "domain" {
   api_id      = aws_apigatewayv2_api.http_api.id
   domain_name = aws_apigatewayv2_domain_name.domain.id
   stage       = aws_apigatewayv2_stage.default.id
@@ -76,14 +76,14 @@ resource aws_apigatewayv2_api_mapping domain {
 
 # API GATEWAY :: HTTP API
 
-resource aws_apigatewayv2_api http_api {
+resource "aws_apigatewayv2_api" "http_api" {
   description   = "Boston TWC website"
   name          = "website"
   protocol_type = "HTTP"
   tags          = local.tags
 }
 
-resource aws_apigatewayv2_stage default {
+resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id
   auto_deploy = true
   name        = "$default"
@@ -109,7 +109,7 @@ resource aws_apigatewayv2_stage default {
   }
 }
 
-resource aws_cloudwatch_log_group api_logs {
+resource "aws_cloudwatch_log_group" "api_logs" {
   name              = "/aws/apigatewayv2/${aws_apigatewayv2_api.http_api.name}"
   retention_in_days = 30
   tags              = local.tags
@@ -117,7 +117,7 @@ resource aws_cloudwatch_log_group api_logs {
 
 # API GATEWAY :: HTTP INTEGRATIONS
 
-resource aws_apigatewayv2_integration proxy {
+resource "aws_apigatewayv2_integration" "proxy" {
   api_id               = aws_apigatewayv2_api.http_api.id
   connection_type      = "INTERNET"
   description          = "Lambda example"
@@ -134,14 +134,14 @@ resource aws_apigatewayv2_integration proxy {
 
 # API GATEWAY :: HTTP ROUTES
 
-resource aws_apigatewayv2_route get_root {
+resource "aws_apigatewayv2_route" "get_root" {
   api_id             = aws_apigatewayv2_api.http_api.id
   route_key          = "GET /"
   authorization_type = "NONE"
   target             = "integrations/${aws_apigatewayv2_integration.proxy.id}"
 }
 
-resource aws_apigatewayv2_route get_proxy {
+resource "aws_apigatewayv2_route" "get_proxy" {
   api_id             = aws_apigatewayv2_api.http_api.id
   route_key          = "GET /{proxy+}"
   authorization_type = "NONE"
@@ -150,7 +150,7 @@ resource aws_apigatewayv2_route get_proxy {
 
 # LOGS
 
-resource aws_cloudwatch_log_group logs {
+resource "aws_cloudwatch_log_group" "logs" {
   name              = "/aws/lambda/${aws_lambda_function.lambda.function_name}"
   retention_in_days = 30
   tags              = local.tags
@@ -158,7 +158,7 @@ resource aws_cloudwatch_log_group logs {
 
 # IAM
 
-data aws_iam_policy_document assume_role {
+data "aws_iam_policy_document" "assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -169,34 +169,20 @@ data aws_iam_policy_document assume_role {
   }
 }
 
-data aws_iam_policy_document secret {
-  statement {
-    sid       = "GetSecretValue"
-    actions   = ["secretsmanager:GetSecretValue"]
-    resources = [aws_secretsmanager_secret.secret.arn]
-  }
-}
-
-resource aws_iam_role role {
+resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   name               = "${local.app}-lambda"
   tags               = local.tags
 }
 
-resource aws_iam_role_policy inline {
-  name   = "secrets-access"
-  policy = data.aws_iam_policy_document.secret.json
-  role   = aws_iam_role.role.id
-}
-
-resource aws_iam_role_policy_attachment basic {
+resource "aws_iam_role_policy_attachment" "basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   role       = aws_iam_role.role.name
 }
 
 # LAMBDA
 
-resource aws_lambda_function lambda {
+resource "aws_lambda_function" "lambda" {
   description      = "Boston TWC Website"
   filename         = "${path.module}/package.zip"
   function_name    = "website"
@@ -210,13 +196,13 @@ resource aws_lambda_function lambda {
 
   environment {
     variables = {
-      AWS_SECRET = aws_secretsmanager_secret.secret.name
-      S3_BUCKET  = aws_s3_bucket.bucket.bucket
+      GOOGLE_API_KEY     = var.GOOGLE_API_KEY
+      GOOGLE_CALENDAR_ID = var.GOOGLE_CALENDAR_ID
     }
   }
 }
 
-resource aws_lambda_permission invoke {
+resource "aws_lambda_permission" "invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.arn
   principal     = "apigateway.amazonaws.com"
@@ -225,7 +211,7 @@ resource aws_lambda_permission invoke {
 
 # S3
 
-resource aws_s3_bucket bucket {
+resource "aws_s3_bucket" "bucket" {
   acl    = "private"
   bucket = local.domain_name
   tags   = local.tags
@@ -239,21 +225,18 @@ resource aws_s3_bucket bucket {
   }
 }
 
-# SECRETS
+# VARIABLES
 
-data aws_kms_key kms_key {
-  key_id = "alias/aws/secretsmanager"
-}
-
-resource aws_secretsmanager_secret secret {
-  description = "${local.app} secrets"
-  name        = local.app
-  kms_key_id  = data.aws_kms_key.kms_key.id
-  tags        = local.tags
-}
+variable "GOOGLE_API_KEY" { description = "Google API key" }
+variable "GOOGLE_CALENDAR_ID" { description = "Google Calendar ID" }
 
 # OUTPUTS
 
-output url {
+output "url" {
   value = "https://boston.techworkerscoalition.org/"
+}
+
+output "name_servers" {
+  description = "boston.techworkerscoalition.org nameservers"
+  value       = aws_route53_zone.zone.name_servers
 }

@@ -14,3 +14,4 @@
 *.iid
 *.zip
 .node-version
+build/

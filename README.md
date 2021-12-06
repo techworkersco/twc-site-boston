@@ -4,32 +4,15 @@ Local Boston subdomain website.
 
 ## Quickstart
 
-First, run `make .env` and fill the appropriate values into the file.
+First, run `make` to build the project.
 
-Then run a local web server natively or with Docker.
+Then, open `.env` and `terraform.tfvars` and fill-in the appropriate `GOOGLE_*` values.
 
-### Docker (recommended)
+You can now run the app locally at [http://localhost:3000/](http://localhost:3000/) with `make up`
 
-Use `make` to build a Docker image and run start a container running the web server:
+## Deploy
 
-```bash
-make up [--dry-run]
-```
-
-### NodeJS
-
-Install node modules and start server:
-
-```bash
-npm install
-npm start
-```
-
-Navigate to [localhost:3000](http://localhost:3000) to see an instance of the website running locally.
-
-## Build & Deploy
-
-This repo is configured to auto-deploy on tagged commits via [GitHub Actions](https://github.com/techworkersco/twc-site-boston/actions). Simply commit your changes, **tag** the repo and push to GitHub and Travis should do the rest!
+This repo is configured to auto-deploy on tagged commits via [GitHub Actions](https://github.com/techworkersco/twc-site-boston/actions). Simply commit your changes, **tag** the repo, and push to GitHub and it should do the rest!
 
 [Terraform](https://terraform.io) is used to manage infrastructure.
 
@@ -51,6 +34,12 @@ Update infrastructure with:
 make apply [--dry-run]
 ```
 
+or, to apply without an approval prompt:
+
+```bash
+make apply-auto [--dry-run]
+```
+
 Clean up any generated artifacts with:
 
 ```bash
@@ -65,4 +54,4 @@ The project manages the following AWS components:
 - **API Gateway** — Web service to invoke the Lambda
 - **ACM Certificate** — An Amazon-issued SSL certificate for `boston.techworkerscoalition.org`
 - **Custom Domain** — Custom domain mapping the API to `boston.techworkerscoalition.org` using the above ACM certificate
-- **S3 Bucket** — S3 bucket for serving static assets to support the website and hosting the Lambda package
+- **S3 Bucket** — S3 bucket for storing terraform state

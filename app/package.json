@@ -7,12 +7,11 @@
     "googleapis": "^59.0.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.1039.0",
     "dotenv": "^8.0.0"
   },
   "name": "boston.techworkerscoalition.org",
   "private": true,
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   }
 }
