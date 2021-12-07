@@ -1,12 +1,12 @@
-all: .env terraform.tfvars app/node_modules package.zip
+all: .env terraform.tfvars package.zip
 
 build: package.zip
 
 clean:
-	rm -rf app/node_modules build package.zip
+	rm -rf build package.zip
 
-up: .env app/node_modules
-	cd app && npm start
+up: .env node_modules
+	npm start
 
 plan: package.zip | .terraform
 	terraform plan
@@ -19,16 +19,17 @@ apply-auto: package.zip | .terraform
 
 .PHONY: all build clean up plan apply apply-auto
 
-package.zip: app/*.js app/*.json app/views/*
+package.zip: app/*.js app/views/* node_modules
 	mkdir -p build
-	cp app/package*.json build
+	cp package*.json build
 	cp app/index.js build
 	cp -r app/views build/views
-	cd build && npm install --production
-	cd build && zip -9r ../$@ *
+	cd build \
+	&& npm install --production \
+	&& zip -9qr ../$@ *
 
-app/node_modules: app/package.json
-	cd app && npm install
+node_modules: package.json
+	npm install && touch node_modules
 
 terraform.tfvars:
 	echo 'GOOGLE_API_KEY     = "<fill-me-in>"' >> $@

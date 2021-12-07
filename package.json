@@ -12,6 +12,7 @@
   "name": "boston.techworkerscoalition.org",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "build": "make build",
+    "start": "node app/server.js"
   }
 }
