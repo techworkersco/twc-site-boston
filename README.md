@@ -1,5 +1,7 @@
 # Boston Tech Workers Coalition
 
+[![plan](https://github.com/techworkersco/twc-site-boston/actions/workflows/plan.yml/badge.svg)](https://github.com/techworkersco/twc-site-boston/actions/workflows/plan.yml)
+
 Local Boston subdomain website.
 
 ## Prerequisites
