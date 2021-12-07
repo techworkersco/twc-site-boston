@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "aws-serverless-express": "^3.3.8",
     "ejs": "^2.6.1",
     "express": "^4.17.1",
     "express-useragent": "^1.0.15",
-    "googleapis": "^59.0.0"
+    "googleapis": "^92.0.0",
+    "serverless-http": "^2.7.0"
   },
   "devDependencies": {
-    "dotenv": "^8.0.0"
+    "dotenv": "^10.0.0"
   },
   "name": "boston.techworkerscoalition.org",
   "private": true,

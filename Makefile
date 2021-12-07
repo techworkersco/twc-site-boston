@@ -22,7 +22,6 @@ apply-auto: package.zip | .terraform
 package.zip: app/*.js app/*.json app/views/*
 	mkdir -p build
 	cp app/package*.json build
-	cp app/app.js build
 	cp app/index.js build
 	cp -r app/views build/views
 	cd build && npm install --production
