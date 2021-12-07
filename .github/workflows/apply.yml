@@ -7,7 +7,7 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1
       - uses: aws-actions/configure-aws-credentials@v1
         with:
