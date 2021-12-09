@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
       - uses: hashicorp/setup-terraform@v1
       - uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -17,3 +20,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-duration-seconds: 900
       - run: make apply-auto
+        env:
+          TF_VAR_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          TF_VAR_GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
