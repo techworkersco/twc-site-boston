@@ -24,25 +24,23 @@ const app = express();
 const router = express.Router();
 const gcal = google.calendar({ version: "v3", auth: GOOGLE_API_KEY });
 
-router.get("/", (req, res) => {
-  gcal.events
-    .list({
-      calendarId: GOOGLE_CALENDAR_ID,
-      maxResults: 3,
-      orderBy: "startTime",
-      singleEvents: true,
-      timeMin: new Date(),
-    })
-    .then((data) => {
-      res.render("index", { events: data.data.items });
-    });
+router.get("/", (_, res) => {
+  gcal.events.list({
+    calendarId: GOOGLE_CALENDAR_ID,
+    maxResults: 3,
+    orderBy: "startTime",
+    singleEvents: true,
+    timeMin: new Date(),
+  }).then((data) => {
+    res.render("index", { events: data.data.items });
+  });
 });
 
 router.get("/events", (req, res) => {
   res.redirect("/calendar");
 });
 
-router.get("/calendar", (req, res) => {
+router.get("/calendar", (_, res) => {
   res.render("calendar", { id: GOOGLE_CALENDAR_ID });
 });
 
@@ -54,7 +52,7 @@ router.get("/calendar/google", (req, res) => {
   }
 });
 
-router.get("/calendar/webcal", (req, res) => {
+router.get("/calendar/webcal", (_, res) => {
   res.redirect(getWebcalUrl(GOOGLE_CALENDAR_ID));
 });
 

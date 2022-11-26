@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "express-useragent": "^1.0.15",
+    "googleapis": "^109.0.1",
+    "serverless-http": "^2.7.0"
+  },
+  "name": "boston.techworkerscoalition.org",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

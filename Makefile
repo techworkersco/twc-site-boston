@@ -1,42 +1,32 @@
-all: .env terraform.tfvars package.zip
-
-build: package.zip
+build: .env terraform.tfvars package.zip
 
 clean:
-	rm -rf build package.zip
+	rm -rf src/node_modules package.zip
 
-up: .env node_modules
-	npm start
-
-plan: package.zip | .terraform
-	terraform plan
-
-apply: package.zip | .terraform
-	terraform apply
-
-apply-auto: package.zip | .terraform
+deploy: build .terraform
 	terraform apply -auto-approve
 
-.PHONY: all build clean up plan apply apply-auto
+logs:
+	aws logs tail /aws/lambda/website --follow
 
-package.zip: app/*.js app/views/* node_modules
-	mkdir -p build
-	cp package*.json build
-	cp app/index.js build
-	cp -r app/views build/views
-	cd build \
-	&& npm install --production \
-	&& zip -9qr ../$@ *
+start: build
+	cd src && npm start
 
-node_modules: package.json
-	npm install && touch node_modules
-
-terraform.tfvars:
-	echo 'GOOGLE_API_KEY     = "<fill-me-in>"' >> $@
-	echo 'GOOGLE_CALENDAR_ID = "<fill-me-in>"' >> $@
+.PHONY: build clean deploy logs start
 
 .env:
 	cp $@.example $@
 
 .terraform: *.tf
-	terraform init && touch .terraform || rm -rf .terraform
+	terraform init
+	touch $@
+
+package.zip: src/node_modules src/views/* src/index.js src/package*.json
+	cd src && zip -9qr ../$@ node_modules views index.js package*.json
+
+src/node_modules: src/package.json
+	cd src && npm install
+	touch $@
+
+terraform.tfvars:
+	echo 'GOOGLE_API_KEY = "<fill-me-in>"' >> $@

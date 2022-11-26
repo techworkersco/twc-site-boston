@@ -6,12 +6,12 @@ Local Boston subdomain website.
 
 ## Prerequisites
 
-_Development_
+Development:
 
 - Google API Key
-- NodeJS 14.x
+- NodeJS 18.x
 
-_Deployment_
+Deployment:
 
 - AWS Credentials
 - Terraform
@@ -29,19 +29,17 @@ Open `.env` and `terraform.tfvars` and fill-in the appropriate `GOOGLE_*` values
 ```bash
 # .env
 GOOGLE_API_KEY=<fill-me-in>
-GOOGLE_CALENDAR_ID=<fill-me-in>
 ```
 
 ```bash
 # terraform.tfvars
-GOOGLE_API_KEY     = "<fill-me-in>"
-GOOGLE_CALENDAR_ID = "<fill-me-in>"
+GOOGLE_API_KEY = "<fill-me-in>"
 ```
 
 Start a local server at [http://localhost:3000/](http://localhost:3000/):
 
 ```bash
-make up
+make start
 ```
 
 ## Deploy
@@ -67,19 +65,19 @@ make [--dry-run]
 Generate a terraform plan with:
 
 ```bash
-make plan [--dry-run]
+terraform plan
 ```
 
 Update infrastructure with:
 
 ```bash
-make apply [--dry-run]
+terraform apply [-auto-approve]
 ```
 
 or, to apply without an approval prompt:
 
 ```bash
-make apply-auto [--dry-run]
+make deploy [--dry-run]
 ```
 
 Clean up any generated artifacts with:

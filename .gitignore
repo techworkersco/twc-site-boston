@@ -9,9 +9,8 @@
 *.tfvars
 
 **/.terraform/
+**/build/
 **/node_modules/
 *.env
 *.iid
 *.zip
-.node-version
-build/

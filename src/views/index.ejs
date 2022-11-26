@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include head.ejs %>
+  <%- include('head.ejs'); %>
 
   <body>
-    <%- include header.ejs %>
+    <%- include('header.ejs'); %>
 
     <main class="contain">
       <h1 class="lh-tight marg-b-3">
@@ -45,7 +45,7 @@
             <%= event.location %>
           </a>
         </sub>
-        <% (event.description || '').split(/\n\n/).map(p => { %>
+        <% (event.description || '').split(/\n\n/).map((p) => { %>
         <p><%- p %></p>
         <% }); %>
         <br />
@@ -71,6 +71,6 @@
       </div>
     </main>
 
-    <%- include footer.ejs %>
+    <%- include('footer.ejs'); %>
   </body>
 </html>
