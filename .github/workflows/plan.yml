@@ -6,11 +6,11 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: "14"
-      - uses: hashicorp/setup-terraform@v1
+          node-version: 18
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

@@ -6,13 +6,16 @@ clean:
 deploy: build .terraform
 	terraform apply -auto-approve
 
+plan: build .terraform
+	terraform plan
+
 logs:
 	aws logs tail /aws/lambda/website --follow
 
 start: build
 	cd src && npm start
 
-.PHONY: build clean deploy logs start
+.PHONY: build clean deploy plan logs start
 
 .env:
 	cp $@.example $@

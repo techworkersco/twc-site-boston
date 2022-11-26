@@ -7,11 +7,11 @@ jobs:
   apply:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: "14"
-      - uses: hashicorp/setup-terraform@v1
+          node-version: 18
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -19,7 +19,7 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-duration-seconds: 900
-      - run: make apply-auto
+      - run: make deploy
         env:
           TF_VAR_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           TF_VAR_GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
